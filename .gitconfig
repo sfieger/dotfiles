@@ -1,6 +1,7 @@
 [user]
 	email = steffen@fieger-schortens.de
 	name = "Steffen Fieger"
+	signingkey = E0C68B55245181C663DB3DF22E5DC6ED3DE52A2B
 [core]
 	# Windows
 	autocrlf = true
@@ -41,3 +42,5 @@
 	conflictstyle = diff3
 [mergetool]
 	prompt = false
+[credential]
+	helper = store
