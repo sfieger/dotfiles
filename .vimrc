@@ -35,6 +35,10 @@ set expandtab
 
 set list
 set listchars=tab:⇥\ ,trail:␣,nbsp:␣,eol:¶
+set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
+set showbreak=\\_
+highlight SpecialKey ctermfg=darkred
 
 set background=dark
 colorscheme solarized
+call togglebg#map("<F5>")
