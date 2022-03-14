@@ -28,6 +28,7 @@
 	all = "!f() { ls | xargs -I{} git -C {} $1; }; f"
 	amend = commit --amend
 	co = checkout
+	colast = checkout @{-1}
 	ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
 	l = log -1 HEAD
 	ll = log --pretty=format:'%C(auto)%h %C(magenta)%ad %C(blue)[%an] %C(auto)%d %C(reset)%s' --all --graph --date=format:'%Y-%m-%d %H:%M'
@@ -44,3 +45,9 @@
 	prompt = false
 [credential]
 	helper = store
+[gitflow "prefix"]
+	hotfix = hotfix/
+	feature = feature/
+	bugfix = bugfix/
+	release = release/
+	support = support/
