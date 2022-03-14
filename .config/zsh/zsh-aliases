@@ -1,16 +1,20 @@
+#!/bin/sh
 alias config='/usr/bin/git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
-
-# Colorize grep output (good for log files)
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-
-# confirm before overwriting something
-alias cp='cp -i'
-alias mv='mv -i'
-alias rm='rm -i'
 
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias ls='ls --color=auto'
+alias ls="ls --color=auto"
+
+alias grep='grep --color=auto'
+
+alias mkdir='mkdir -pv'
+
+alias mv='mv -i'
+alias rm='rm -i'
+alias cp='cp -i'
+alias ln='ln -i'
+
+alias ..='cd ..'
+
+alias vim='vim -c "let g:tty='\''$(tty)'\''"'
