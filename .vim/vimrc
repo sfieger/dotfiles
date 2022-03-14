@@ -1,0 +1,68 @@
+" VIMRC
+" set shell to zsh
+:set shell=/usr/bin/zsh
+
+" minimal settings
+filetype plugin indent on
+syntax enable
+set backspace=indent,eol,start
+set hidden
+set noswapfile
+
+let $RTP=split(&runtimepath, ',')[0]
+let $RC="$HOME/.vim/vimrc"
+
+set path=.,**
+
+" default indentation
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set autoindent
+
+" line numbers and others editing goodies
+set number relativenumber
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
+
+" Map key to toggle opt
+function MapToggle(key, opt)
+  let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
+  exec 'nnoremap '.a:key.' '.cmd
+  exec 'inoremap '.a:key." \<C-O>".cmd
+endfunction
+command -nargs=+ MapToggle call MapToggle(<f-args>)
+
+set cursorline
+set list
+set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
+set showbreak=\\
+MapToggle <F6> list
+
+set ignorecase
+set smartcase
+MapToggle <F7> hlsearch
+MapToggle <F8> incsearch
+
+
+" UI
+" colortheme
+set background=dark
+colorscheme solarized
+call togglebg#map("<F5>")
+highlight SpecialKey ctermfg=darkred
+
+set showmode
+set showcmd
+
+set laststatus=2
+set cmdheight=2
+
+set wildmenu
+set ruler
+
+let g:netrw_banner=0
+let g:netrw_liststyle=3
