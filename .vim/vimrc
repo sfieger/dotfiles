@@ -21,12 +21,7 @@ set expandtab
 set autoindent
 
 " line numbers and others editing goodies
-set number relativenumber
-augroup numbertoggle
-  autocmd!
-  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
-augroup END
+set number norelativenumber
 
 " Map key to toggle opt
 function MapToggle(key, opt)
