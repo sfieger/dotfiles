@@ -32,7 +32,6 @@ endfunction
 command -nargs=+ MapToggle call MapToggle(<f-args>)
 
 set cursorline
-set list
 set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
 set showbreak=\\
 MapToggle <F6> list
