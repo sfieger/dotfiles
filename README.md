@@ -4,7 +4,7 @@ Diverse Konfigurationen
 ## Auf neuem System
 
 * in .bashrc `alias config='/usr/bin/git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'` einfügen
-* `git clone --bare git@github.com:sfieger/dotfiles.git $HOME/dotfiles`
+* `git clone --bare git@github.com:sfieger/dotfiles.git $HOME/dotfiles --recurse-submodules`
 * `alias config='/usr/bin/git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'`
 * `config checkout`
     * bei Fehler:
