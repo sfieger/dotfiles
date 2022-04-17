@@ -4,8 +4,8 @@
 	signingkey = E0C68B55245181C663DB3DF22E5DC6ED3DE52A2B
 [core]
 	# Windows
-	autocrlf = true
-	whitespace = trailing-space,space-before-tab,indent-with-non-tab,cr-at-eol
+#	autocrlf = true
+#	whitespace = trailing-space,space-before-tab,indent-with-non-tab,cr-at-eol
 	# Linux
 	autocrlf = input
 	
