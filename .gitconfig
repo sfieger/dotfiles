@@ -1,7 +1,7 @@
 [user]
 	email = steffen@fieger-schortens.de
 	name = "Steffen Fieger"
-	signingkey = E0C68B55245181C663DB3DF22E5DC6ED3DE52A2B
+	signingkey = 722F7C6F96DC1549
 [core]
 	# Windows
 #	autocrlf = true
@@ -22,6 +22,8 @@
 	autosetuprebase = always
 [push]
 	default = current
+[commit]
+        gpgsign = true
 [diff]
 	renameLimit = 1000
 [alias]
@@ -29,7 +31,8 @@
 	amend = commit --amend
 	co = checkout
 	colast = checkout @{-1}
-	ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
+        dummy = commit -m "This is a blank commit" --allow-empty
+        ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
 	l = log -1 HEAD
 	ll = log --pretty=format:'%C(auto)%h %C(magenta)%ad %C(blue)[%an] %C(auto)%d %C(reset)%s' --all --graph --date=format:'%Y-%m-%d %H:%M'
 	master = checkout master
