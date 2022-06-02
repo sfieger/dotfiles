@@ -19,3 +19,4 @@ alias ln='ln -i'
 alias ..='cd ..'
 
 alias vim='vim -c "let g:tty='\''$(tty)'\''"'
+alias diff='icdiff'
