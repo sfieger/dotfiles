@@ -128,5 +128,5 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-attach-tmux
 check-updates
+attach-tmux
