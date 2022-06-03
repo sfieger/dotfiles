@@ -46,4 +46,5 @@ fpath=(~/.config/zsh/completion $fpath)
 
 compinit
 
-export EDITOR="vim"
+check-updates
+attach-tmux

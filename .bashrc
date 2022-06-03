@@ -125,4 +125,8 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-export GPG_TTY=$(tty)
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+check-updates
+attach-tmux
