@@ -18,8 +18,6 @@ export PATH=$PATH
 export GPG_TTY=$(tty)
 export EDITOR=vim
 
-check-updates
-
 # if running bash
 if [ "$BASH" ]; then
     # include .bashrc if it exists
