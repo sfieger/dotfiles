@@ -46,5 +46,5 @@ fpath=(~/.config/zsh/completion $fpath)
 
 compinit
 
-attach-tmux
 check-updates
+attach-tmux
