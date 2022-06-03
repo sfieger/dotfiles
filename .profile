@@ -8,21 +8,6 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# if running bash
-if [ "$BASH" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-        . "$HOME/.bashrc"
-    fi
-fi
-
-if [ "$ZSH" ]; then
-    # include .zshrc if it exists
-    if [ -f "$HOME/.zshrc" ]; then
-        . "$HOME/.zshrc"
-    fi
-fi
-
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
@@ -34,3 +19,19 @@ export GPG_TTY=$(tty)
 export EDITOR=vim
 
 check-updates
+
+# if running bash
+if [ "$BASH" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# if running zsh
+if [ "$ZSH" ]; then
+    # include .zshrc if it exists
+    if [ -f "$HOME/.zshrc" ]; then
+        . "$HOME/.zshrc"
+    fi
+fi
