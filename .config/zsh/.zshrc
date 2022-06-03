@@ -45,3 +45,6 @@ zsh_add_plugin "zsh-users/zsh-syntax-highlighting"
 fpath=(~/.config/zsh/completion $fpath)
 
 compinit
+
+attach-tmux
+check-updates
