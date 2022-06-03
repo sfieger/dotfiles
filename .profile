@@ -13,10 +13,10 @@ if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
 
-export PATH=$PATH
-
 export GPG_TTY=$(tty)
 export EDITOR=vim
+
+export PATH=$PATH
 
 # if running bash
 if [ "$BASH" ]; then
