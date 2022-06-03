@@ -30,6 +30,7 @@ fi
 
 export PATH=$PATH
 
+export GPG_TTY=$(tty)
 export EDITOR=vim
 
 check-updates
