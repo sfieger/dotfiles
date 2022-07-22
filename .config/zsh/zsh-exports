@@ -4,6 +4,3 @@ HISTSIZE=1000000
 SAVEHIST=1000000
 
 eval "$(dircolors -b ~/.dircolors)"
-
-export EDITOR=vim
-export GPG_TTY=$(tty)

@@ -126,6 +126,6 @@ if ! shopt -oq posix; then
   fi
 fi
 
-SSH_ENV="$HOME/.ssh/agent-environment"
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-export GPG_TTY=$(tty)
+check-updates
