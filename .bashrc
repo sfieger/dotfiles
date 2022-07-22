@@ -125,4 +125,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+SSH_ENV="$HOME/.ssh/agent-environment"
+
 export GPG_TTY=$(tty)
