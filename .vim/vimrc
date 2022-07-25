@@ -20,9 +20,6 @@ set softtabstop=4
 set expandtab
 set autoindent
 
-" line numbers and others editing goodies
-set number norelativenumber
-
 " Map key to toggle opt
 function MapToggle(key, opt)
   let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
@@ -31,6 +28,7 @@ function MapToggle(key, opt)
 endfunction
 command -nargs=+ MapToggle call MapToggle(<f-args>)
 
+" editing goodies
 set cursorline
 set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
 set showbreak=\\
@@ -40,6 +38,9 @@ set ignorecase
 set smartcase
 MapToggle <F7> hlsearch
 MapToggle <F8> incsearch
+
+set number
+MapToggle <F9> relativenumber
 
 
 " UI
