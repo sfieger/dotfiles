@@ -1,0 +1,48 @@
+wtf:
+  exitMessage:
+    display: true
+  refreshInterval: 1
+  mods:
+    resourceusage:
+      title: "Resource Usage"
+      enabled: true
+      showCPU: true
+      showMem: true
+      showSwp: true
+      cpuCombined: false
+      position:
+        top: 0
+        left: 0
+        height: 2
+        width: 1
+      refreshInterval: 1s
+    ip:
+      title: "My IP"
+      type: ipinfo
+      enabled: true
+      position:
+        top: 0
+        left: 2
+        height: 1
+        width: 1
+      refreshInterval: 5m
+    cmdrunner:
+      title: "Services"
+      args: ["--status-all"]
+      cmd: "service"
+      enabled: true
+      focusable: false
+      position:
+        top: 2
+        left: 0
+        height: 2
+        width: 1
+      refreshInterval: 1s
+    security:
+      title: "Security"
+      enabled: true
+      position:
+        top: 1
+        left: 2
+        height: 1
+        width: 1
