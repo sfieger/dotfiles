@@ -47,5 +47,3 @@ fpath=(~/.config/zsh/completion $fpath)
 compinit
 
 sudo check-updates
-
-eval "$(ssh-agent -s)"

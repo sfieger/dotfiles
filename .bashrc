@@ -129,4 +129,3 @@ fi
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 sudo check-updates
-eval "$(ssh-agent -s)"
