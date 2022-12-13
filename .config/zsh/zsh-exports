@@ -4,3 +4,13 @@ HISTSIZE=1000000
 SAVEHIST=1000000
 
 eval "$(dircolors -b ~/.dircolors)"
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+export GPG_TTY=$(tty)
+export EDITOR=vim
+
+export PATH=$PATH

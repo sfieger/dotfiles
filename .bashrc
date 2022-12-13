@@ -128,4 +128,9 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
+source $HOME/.bash_exports
+
+
+# run custom commands
+start-ssh-agent
 sudo check-updates
