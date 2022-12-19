@@ -1,4 +1,4 @@
-# ~/.bash_logout: executed by bash(1) when login shell exits.
+# ~/.zlogout: executed by zsh(1) when login shell exits.
 
 trap 'kill $SSH_AGENT_PID' EXIT
 
