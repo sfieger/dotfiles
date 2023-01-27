@@ -46,5 +46,5 @@ fpath=(~/.config/zsh/completion $fpath)
 
 compinit
 
-# run custom commands
-sudo check-updates
+# custom commands
+check-updates
