@@ -17,10 +17,12 @@
 	tag = yellow
 	branch = green
 	remotebranch = red
-[pull]
-	rebase = true
 [branch]
 	autosetuprebase = always
+[checkout]
+        defaultRemote = origin
+[pull]
+	rebase = true
 [push]
 	default = current
 [commit]
