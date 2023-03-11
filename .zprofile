@@ -1,13 +1,3 @@
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-export GPG_TTY=$(tty)
-export EDITOR=vim
-
-export PATH=$PATH
-
 SSH_ENV="$HOME/.ssh/agent-environment"
 
 function start_agent {
