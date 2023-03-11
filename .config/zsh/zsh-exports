@@ -5,6 +5,8 @@ SAVEHIST=1000000
 
 eval "$(dircolors -b ~/.dircolors)"
 
+export DFT_BACKGROUND=light
+
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"

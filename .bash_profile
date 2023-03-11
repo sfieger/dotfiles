@@ -5,6 +5,7 @@ fi
 
 export GPG_TTY=$(tty)
 export EDITOR=vim
+export DFT_BACKGROUND=light
 
 export PATH=$PATH
 

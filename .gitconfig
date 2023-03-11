@@ -29,6 +29,7 @@
         gpgsign = true
 [diff]
 	renameLimit = 1000
+	external = difft
 [merge]
 	tool = vimdiff2
 	conflictstyle = diff3
