@@ -59,7 +59,6 @@
 
         # diffs
         dc = diff --cached
-        diff = diff --word-diff
         dlc = diff --cached HEAD^
 
         # fancy stuff
