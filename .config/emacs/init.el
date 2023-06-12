@@ -16,15 +16,16 @@
 
 
 ;; Must-Have settings
+;; y/n instead of yes/no
+(fset 'yes-or-no-p 'y-or-n-p)
+
 ;; Remember recently edited files
 (recentf-mode 1)
 
 ;; Remeber minibuffer prompt history
 (setq history-length 25)
 (savehist-mode 1)
-
-;; Remember last cursor position in file
-(save-place-mode 1)
+(setq history-delete-duplicates t)
 
 ;; File for custom variables
 (setq custom-file (locate-user-emacs-file "~/.config/emacs/custom-vars.el"))
@@ -36,6 +37,263 @@
 ;; Auto-Revert buffers on external change
 (global-auto-revert-mode 1)
 (setq global-auto-revert-non-file-buffers t)
+
+;; German Calendar
+(setq-default calendar-week-start-day 1
+          calendar-day-name-array ["Sonntag" "Montag" "Dienstag" "Mittwoch"
+                                       "Donnerstag" "Freitag" "Samstag"]
+          calendar-month-name-array ["Januar" "Februar" "März" "April" "Mai"
+                     "Juni" "Juli" "August" "September"
+                     "Oktober" "November" "Dezember"])
+(setq solar-n-hemi-seasons
+      '("Frühlingsanfang" "Sommeranfang" "Herbstanfang" "Winteranfang"))
+;; German Holiyas
+(setq holiday-general-holidays
+      '((holiday-fixed 1 1 "Neujahr")
+        (holiday-fixed 5 1 "1. Mai")
+        (holiday-fixed 10 3 "Tag der Deutschen Einheit")))
+;; for NW
+(setq holiday-christian-holidays
+      '(;; (holiday-fixed 1 6 "Heilige Drei Könige") ;; BW, BY, ST
+    (holiday-easter-etc  -2 "Karfreitag")
+        (holiday-easter-etc   0 "Ostersonntag")
+        (holiday-easter-etc  +1 "Ostermontag")
+        (holiday-easter-etc +39 "Christi Himmelfahrt")
+        (holiday-easter-etc +49 "Pfingstsonntag")
+        (holiday-easter-etc +50 "Pfingstmontag")
+        (holiday-easter-etc +60 "Fronleichnam") ;; BW, BY, HE, NW, RP, SL, (SN), (TH)
+    ;; (holiday-fixed 8 15 "Mariä Himmelfahrt") ;; (BY), SL
+        ;; (holiday-fixed 11 31 "Reformationstag") ;; BB, HB, HH, MV, NI, SN, ST, SH TH
+    (holiday-fixed 11 1 "Allerheiligen") ;; BW, BY, NW, RP, SL
+        ;; (holiday-float 11 3 1 "Buss- und Bettag" 16) ;; SN 
+    (holiday-float 12 0 -4 "1. Advent" 24)
+        (holiday-float 12 0 -3 "2. Advent" 24)
+        (holiday-float 12 0 -2 "3. Advent" 24)
+        (holiday-float 12 0 -1 "4. Advent" 24)
+        (holiday-fixed 12 25 "1. Weihnachtstag")
+        (holiday-fixed 12 26 "2. Weihnachtstag")
+    ))
+(setq holiday-local-holidays
+      '(;; (holiday-fixed 3 8 "Frauentag") ;; BE, MV
+        (holiday-easter-etc -48 "Rosenmontag")
+    ;; (holiday-fixed 8 8 "Augsburger Hohes Friedensfest") ;; BY
+    ;; (holiday-fixed 9 20 "Weltkindertag") ;; TH
+    ;; (holiday-fixed 11 11 "Elfter im Elften")
+    (holiday-fixed 12 24 "Heiligabend")
+    (holiday-fixed 12 31 "Silvester")
+    ))
+(setq holiday-hebrew-holidays nil
+      holiday-islamic-holidays nil
+      holiday-bahai-holidays nil
+      holiday-oriental-holidays nil
+      holiday-solar-holidays nil)
+
+
+;; Package Manager
+(require 'package)
+
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+             ("org" . "https://orgmode.org/elpa/")
+             ("gnu" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+
+(require 'bind-key)
+(use-package diminish)
+
+
+;; Helper
+;; Check if system is Microsoft Windows
+(defun my-system-type-is-windows ()
+  "Return true if system is Windows-based (at least up to Win7)"
+  (string-equal system-type "windows-nt"))
+
+;; Check if system is GNU/Linux
+(defun my-system-type-is-gnu ()
+  "Return true if system is GNU/Linux-based"
+  (string-equal system-type "gnu/linux"))
+
+
+;; Which Key
+(use-package which-key
+  :ensure t
+  :defer 120
+  :diminish
+  :config
+  (which-key-setup-side-window-right)
+  (setq which-key-idle-delay 1)
+  (which-key-mode))
+
+;; Ivy, Counsel, Swiper
+(use-package ivy
+  :ensure t
+  :diminish
+  :config
+  (defcustom ivy-use-group-face-if-no-groups t
+    "If t, and the expression has no subgroups, highlight whole match as a group.
+    It will then use the second face (first of the \"group\" faces)
+    of `ivy-minibuffer-faces'.  Otherwise, always use the first face
+    in this case."
+    :type 'boolean)
+  (ivy-mode 1))
+(setq ivy-use-virtual-buffers t)
+(setq ivy-count-format "(%d/%d) ")
+
+(use-package counsel
+  :ensure t
+  :diminish
+  :config
+  (counsel-mode))
+
+(use-package swiper)
+(global-set-key (kbd "C-s") 'swiper)
+
+
+;; General key bindings
+(global-set-key (kbd "M-l") 'downcase-word)
+(global-set-key (kbd "M-u") 'upcase-word)
+(global-set-key (kbd "M-c") 'capitalize-word)
+
+
+;; Org-Mode
+;; Key Bindings
+(global-set-key (kbd "C-c l") #'org-store-link)
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
+
+;; Capture-Templates
+(setq org-capture-templates
+      '(("b" "Bookmark" entry (file+headline "~/org/misc.org" "Bookmarks")
+     "* %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n")
+    ("c" "Contact" entry (file+headline "~/org/misc.org" "Contacts")
+     "* %?\n:PROPERTIES:\n:TITLE: \n:BIRTHDAY: %^t\n:PHONE: \n:MOBILE: \n:EMAIL: \n:STREET: \n:POSTALCODE: \n:CITY: \n:COUNTRY: \n:COMPANY: \n:WORKPHONE: \n:WORKMAIL: \n:CREATED: %u\n:END:\n")
+        ("t" "TODO [inbox]" entry (file+headline "~/org/gtd/gtd.org" "Inbox")
+     "* TODO %i%?" :prepend 1)
+    ("T" "Tickler" entry (file+headline "~/org/gtd/gtd.org" "Inbox")
+     "* %^t %i%?" :prepend 1)))
+(setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)")))
+
+;; Agenda
+(setq org-agenda-files '("~/org/gtd/gtd.org"
+             "~/org/misc.org"))
+(setq org-agenda-include-diary t)
+(setq org-agenda-prefix-format
+      '((todo . "%b %i %-12:c")))
+(setq org-agenda-custom-commands
+      '(("D" "Daily Review"
+     ((agenda "" ((org-agenda-span 7)))
+      (todo "TODO")
+      (todo "WAITING")))
+    ("W" "Weekly Review"
+         ((agenda "" ((org-agenda-span 14)))
+          (todo "WAITING")
+          (todo "SOMEDAY")
+      (stuck "" ((org-agenda-files '("~/org/gtd/gtd.org"))))))
+    ))
+
+
+;; Spelling
+(if (my-system-type-is-windows)
+    (setq ispell-program-name "C:/Program Files/Git/usr/bin/aspell.exe"))
+
+(require 'ispell)
+(setq ispell-silently-savep t)
+(setq ispell-dictionary "german")
+
+(let ((langs '("german" "american")))
+      (setq lang-ring (make-ring (length langs)))
+      (dolist (elem langs) (ring-insert lang-ring elem)))
+
+(defun my-toggle-ispell-language ()
+  (interactive)
+  (let ((lang (ring-ref lang-ring -1)))
+    (ring-insert lang-ring lang)
+    (ispell-change-dictionary lang)))
+
+(if (file-exists-p "~/.config/emacs/thesaurus/openthesaurus.txt")
+  (use-package synonyms
+    :load-path  (lambda () (expand-file-name "~/.config/emacs/contrib/synonyms/"))
+    :init ;; executed before loading package
+    (setq synonyms-file        "~/.config/emacs/thesaurus/openthesaurus.txt")
+    (setq synonyms-cache-file  "~/.config/emacs/thesaurus/vkcachefile")
+    :config
+    (defun my-synonym-current-word ()
+      "Lookup synonyms for current word."
+      (interactive)
+      (synonyms-lookup (thing-at-point 'word) nil nil))
+  )
+(message ("»»» I could not locate \"~/.config/emacs/thesaurus/mthesaur.txt\""))
+)
+
+(use-package define-word
+  :ensure t
+)
+
+;; Hydras
+;; F-Key Settings for Hydras
+(setq my-f-key-settings (concat
+" ⇧               |                   |
+"                                                                  (propertize
+" F1  F2  F3  F4  | F5    F6  F7  F8  | F9       F10  F11      F12
+"                                                                  'face '(:foreground "#859900"))
+"                 | Theme             | Spelling Menu maximize
+
+"))
+
+(use-package hydra
+  :ensure t
+  :defer 90
+  :config
+
+  ;; apropos training
+  (defhydra hydra-apropos (:color blue
+                           :hint nil)
+    "
+  _a_propos        _c_ommand
+  _d_ocumentation  _l_ibrary
+  _v_ariable       _u_ser-option
+  ^ ^       valu_e_"
+    ("a" apropos)
+    ("d" apropos-documentation)
+    ("v" apropos-variable)
+    ("c" apropos-command)
+    ("l" apropos-library)
+    ("u" apropos-user-option)
+    ("e" apropos-value))
+  (global-set-key (kbd "C-c h") 'hydra-apropos/body)
+
+  ;; spelling
+  (defhydra hydra-spelling (:color red)
+    (concat my-f-key-settings
+  "
+  ^
+  ^Spelling^          ^Errors^            ^Checker^
+  ^────────^──────────^──────^────────────^───────^───────
+  check _r_egion      _n_ext error        _m_ode
+  check _b_uffer      _c_orrect           toggle _l_anguage
+  _s_ynonym
+  _D_efine word
+  ^^                  ^^                  ^^
+  ")
+  ("q" nil "quit")
+  ("r" flyspell-region nil)
+  ("l" my-toggle-ispell-language nil)
+  ("n" flyspell-goto-next-error nil)
+  ("s" my-synonym-current-word nil :color blue)
+  ("D" define-word-at-point nil :color blue) ;; define-word
+  ("c" flyspell-correct-word-before-point nil)
+  ("b" flyspell-buffer nil)
+  ("m" flyspell-mode nil)
+  )
+  (global-set-key (kbd "<f9>") 'hydra-spelling/body))
 
 
 ;; Modus Themes 4.1.0 configuration
@@ -294,6 +552,6 @@
         (bg-paren-expression "#ffa3e6")))
 
 ;; Load the dark theme by default
-(load-theme 'modus-vivendi t)
+(load-theme 'modus-operandi t)
 
 (define-key global-map (kbd "<f5>") #'modus-themes-toggle)
