@@ -1,6 +1,7 @@
 #!/bin/sh
 export ZDOTDIR=$HOME/.config/zsh
 HISTFILE=~/.zsh_history
+setopt HIST_IGNORE_SPACE
 setopt appendhistory
 
 # some useful options (man zshoptions)
