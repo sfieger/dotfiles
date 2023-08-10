@@ -1,7 +1,10 @@
 ;; Absolute Basics
-(setq inhibit-startup-message t ; Don't show the splash screen
-      visible-bell nil)         ; Don't flash, ring the bell
-
+(setq inhibit-startup-message t ;; Don't show the splash screen
+      visible-bell nil          ;; Don't flash, ring the bell
+      indent-tabs-mode nil)     ;; Spaces for indentation
+(set-face-attribute 'default nil :font "DejaVu Sans Mono" :height 100)
+(set-face-attribute 'fixed-pitch nil :font "DejaVu Sans Mono" :height 100)
+(set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 100 :weight 'regular)
 
 ;; Turn off unneeded UI elements
 (menu-bar-mode -1)
@@ -14,8 +17,14 @@
 (hl-line-mode 1)
 (blink-cursor-mode 1)
 
+(setq backup-by-copying t      ; don't clobber symlinks
+      backup-directory-alist
+      '(("." . "~/.saves/"))    ; don't litter my fs tree
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)       ; use versioned backups
 
-;; Must-Have settings
 ;; y/n instead of yes/no
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -40,14 +49,14 @@
 
 ;; German Calendar
 (setq-default calendar-week-start-day 1
-          calendar-day-name-array ["Sonntag" "Montag" "Dienstag" "Mittwoch"
+              calendar-day-name-array ["Sonntag" "Montag" "Dienstag" "Mittwoch"
                                        "Donnerstag" "Freitag" "Samstag"]
-          calendar-month-name-array ["Januar" "Februar" "März" "April" "Mai"
-                     "Juni" "Juli" "August" "September"
-                     "Oktober" "November" "Dezember"])
+              calendar-month-name-array ["Januar" "Februar" "März" "April" "Mai"
+                                         "Juni" "Juli" "August" "September"
+                                         "Oktober" "November" "Dezember"])
 (setq solar-n-hemi-seasons
       '("Frühlingsanfang" "Sommeranfang" "Herbstanfang" "Winteranfang"))
-;; German Holiyas
+;; German Holidyas
 (setq holiday-general-holidays
       '((holiday-fixed 1 1 "Neujahr")
         (holiday-fixed 5 1 "1. Mai")
@@ -55,33 +64,31 @@
 ;; for NW
 (setq holiday-christian-holidays
       '(;; (holiday-fixed 1 6 "Heilige Drei Könige") ;; BW, BY, ST
-    (holiday-easter-etc  -2 "Karfreitag")
+        (holiday-easter-etc  -2 "Karfreitag")
         (holiday-easter-etc   0 "Ostersonntag")
         (holiday-easter-etc  +1 "Ostermontag")
         (holiday-easter-etc +39 "Christi Himmelfahrt")
         (holiday-easter-etc +49 "Pfingstsonntag")
         (holiday-easter-etc +50 "Pfingstmontag")
         (holiday-easter-etc +60 "Fronleichnam") ;; BW, BY, HE, NW, RP, SL, (SN), (TH)
-    ;; (holiday-fixed 8 15 "Mariä Himmelfahrt") ;; (BY), SL
+        ;; (holiday-fixed 8 15 "Mariä Himmelfahrt") ;; (BY), SL
         ;; (holiday-fixed 11 31 "Reformationstag") ;; BB, HB, HH, MV, NI, SN, ST, SH TH
-    (holiday-fixed 11 1 "Allerheiligen") ;; BW, BY, NW, RP, SL
+        (holiday-fixed 11 1 "Allerheiligen") ;; BW, BY, NW, RP, SL
         ;; (holiday-float 11 3 1 "Buss- und Bettag" 16) ;; SN 
-    (holiday-float 12 0 -4 "1. Advent" 24)
+        (holiday-float 12 0 -4 "1. Advent" 24)
         (holiday-float 12 0 -3 "2. Advent" 24)
         (holiday-float 12 0 -2 "3. Advent" 24)
         (holiday-float 12 0 -1 "4. Advent" 24)
         (holiday-fixed 12 25 "1. Weihnachtstag")
-        (holiday-fixed 12 26 "2. Weihnachtstag")
-    ))
+        (holiday-fixed 12 26 "2. Weihnachtstag")))
 (setq holiday-local-holidays
       '(;; (holiday-fixed 3 8 "Frauentag") ;; BE, MV
         (holiday-easter-etc -48 "Rosenmontag")
-    ;; (holiday-fixed 8 8 "Augsburger Hohes Friedensfest") ;; BY
-    ;; (holiday-fixed 9 20 "Weltkindertag") ;; TH
-    ;; (holiday-fixed 11 11 "Elfter im Elften")
-    (holiday-fixed 12 24 "Heiligabend")
-    (holiday-fixed 12 31 "Silvester")
-    ))
+        ;; (holiday-fixed 8 8 "Augsburger Hohes Friedensfest") ;; BY
+        ;; (holiday-fixed 9 20 "Weltkindertag") ;; TH
+        ;; (holiday-fixed 11 11 "Elfter im Elften")
+        (holiday-fixed 12 24 "Heiligabend")
+        (holiday-fixed 12 31 "Silvester")))
 (setq holiday-hebrew-holidays nil
       holiday-islamic-holidays nil
       holiday-bahai-holidays nil
@@ -93,8 +100,8 @@
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-             ("org" . "https://orgmode.org/elpa/")
-             ("gnu" . "https://elpa.gnu.org/packages/")))
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
 (unless package-archive-contents
@@ -121,6 +128,70 @@
   "Return true if system is GNU/Linux-based"
   (string-equal system-type "gnu/linux"))
 
+(defun my-dired-tagtrees ()
+    "Run \"filetags --tagtrees\" on current or marked files"
+    (interactive)
+    (let* ((marked-files (f-uniquify (dired-get-marked-files))))
+      (when (my-system-type-is-windows)
+        (dired-do-shell-command "filetags --tagtrees --tagtrees-handle-no-tag no-tags" nil marked-files))
+      (when (my-system-type-is-gnu)
+        (dired-do-shell-command (concat "xfce4-terminal --geometry=90x5+330+5 --hide-menubar -x " my-filetags-file " --tagtrees --tagtrees-handle-no-tag no-tags *") nil marked-files))))
+
+(defun my-dired-tagtrees-recursive ()
+  "Run \"filetags --tagtrees --recursive\" on current or marked files"
+  (interactive)
+  (let* ((marked-files (f-uniquify (dired-get-marked-files))))
+    (when (my-system-type-is-windows)
+      (dired-do-shell-command "C:\\Python36\\Scripts\\filetags.exe --tagtrees --recursive --tagtrees-handle-no-tag no-tags *" nil marked-files))
+    (when (my-system-type-is-gnu)
+      (dired-do-shell-command (concat "xfce4-terminal --geometry=90x5+330+5 --hide-menubar -x " my-filetags-file " --tagtrees --recursive --tagtrees-handle-no-tag no-tags *") nil marked-files))))
+
+(defun my-dired-date2name ()
+  "Run \"time2name\" on current or marked files"
+  (interactive)
+  (let* ((marked-files (f-uniquify (dired-get-marked-files))))
+    (dired-do-shell-command (concat my-date2name-file " *") nil marked-files))
+  (revert-buffer nil t t))
+
+
+(defun my-dired-time2name ()
+  "Run \"date2name --withtime\" on current or marked files"
+  (interactive)
+  (let* ((marked-files (f-uniquify (dired-get-marked-files))))
+    (dired-do-shell-command (concat my-date2name-file " --withtime *") nil marked-files))
+  (revert-buffer nil t t))
+
+(defun my-dired-copy-filename-as-absolute-link (&optional arg)
+  "Copy current file name with absolute path as [[file:<absolute path>]] link.
+   If the universal argument is given, the path is omitted in the link description."
+  (interactive "P")
+  (dired-copy-filename-as-kill 0)
+  (let* ((path (current-kill 0)))
+    (kill-new (concat "[[file:" path "]]"))))
+
+(defun my-dired-open-in-file-manager ()
+  "Show current file in desktop.
+ (Windows Explorer)
+ This command can be called when in a file or in `dired'.
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2018-01-13 adapted by Karl Voit 2018-07-01
+Version 2023-06-22 adapted by Steffen Fieger"
+  (interactive)
+  (let (($path (file-truename (if (buffer-file-name) (buffer-file-name) default-directory ))))
+    (cond
+     ((string-equal system-type "windows-nt")
+      (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" $path t t))))))
+
+;; General key bindings
+(global-set-key (kbd "<f6>") 'whitespace-mode)
+(global-set-key (kbd "M-l") 'downcase-word)
+(global-set-key (kbd "M-u") 'upcase-word)
+(global-set-key (kbd "M-c") 'capitalize-word)
+
+(bind-keys
+ :prefix-map my-map
+ :prefix-docstring "My own keyboard map"
+ :prefix "C-c C-.")
 
 ;; Which Key
 (use-package which-key
@@ -156,50 +227,6 @@
 (use-package swiper)
 (global-set-key (kbd "C-s") 'swiper)
 
-
-;; General key bindings
-(global-set-key (kbd "M-l") 'downcase-word)
-(global-set-key (kbd "M-u") 'upcase-word)
-(global-set-key (kbd "M-c") 'capitalize-word)
-
-
-;; Org-Mode
-;; Key Bindings
-(global-set-key (kbd "C-c l") #'org-store-link)
-(global-set-key (kbd "C-c a") #'org-agenda)
-(global-set-key (kbd "C-c c") #'org-capture)
-
-;; Capture-Templates
-(setq org-capture-templates
-      '(("b" "Bookmark" entry (file+headline "~/org/misc.org" "Bookmarks")
-     "* %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n")
-    ("c" "Contact" entry (file+headline "~/org/misc.org" "Contacts")
-     "* %?\n:PROPERTIES:\n:TITLE: \n:BIRTHDAY: %^t\n:PHONE: \n:MOBILE: \n:EMAIL: \n:STREET: \n:POSTALCODE: \n:CITY: \n:COUNTRY: \n:COMPANY: \n:WORKPHONE: \n:WORKMAIL: \n:CREATED: %u\n:END:\n")
-        ("t" "TODO [inbox]" entry (file+headline "~/org/gtd/gtd.org" "Inbox")
-     "* TODO %i%?" :prepend 1)
-    ("T" "Tickler" entry (file+headline "~/org/gtd/gtd.org" "Inbox")
-     "* %^t %i%?" :prepend 1)))
-(setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)")))
-
-;; Agenda
-(setq org-agenda-files '("~/org/gtd/gtd.org"
-             "~/org/misc.org"))
-(setq org-agenda-include-diary t)
-(setq org-agenda-prefix-format
-      '((todo . "%b %i %-12:c")))
-(setq org-agenda-custom-commands
-      '(("D" "Daily Review"
-     ((agenda "" ((org-agenda-span 7)))
-      (todo "TODO")
-      (todo "WAITING")))
-    ("W" "Weekly Review"
-         ((agenda "" ((org-agenda-span 14)))
-          (todo "WAITING")
-          (todo "SOMEDAY")
-      (stuck "" ((org-agenda-files '("~/org/gtd/gtd.org"))))))
-    ))
-
-
 ;; Spelling
 (if (my-system-type-is-windows)
     (setq ispell-program-name "C:/Program Files/Git/usr/bin/aspell.exe"))
@@ -209,8 +236,8 @@
 (setq ispell-dictionary "german")
 
 (let ((langs '("german" "american")))
-      (setq lang-ring (make-ring (length langs)))
-      (dolist (elem langs) (ring-insert lang-ring elem)))
+  (setq lang-ring (make-ring (length langs)))
+  (dolist (elem langs) (ring-insert lang-ring elem)))
 
 (defun my-toggle-ispell-language ()
   (interactive)
@@ -218,34 +245,126 @@
     (ring-insert lang-ring lang)
     (ispell-change-dictionary lang)))
 
-(if (file-exists-p "~/.config/emacs/thesaurus/openthesaurus.txt")
-  (use-package synonyms
-    :load-path  (lambda () (expand-file-name "~/.config/emacs/contrib/synonyms/"))
-    :init ;; executed before loading package
-    (setq synonyms-file        "~/.config/emacs/thesaurus/openthesaurus.txt")
-    (setq synonyms-cache-file  "~/.config/emacs/thesaurus/vkcachefile")
-    :config
-    (defun my-synonym-current-word ()
-      "Lookup synonyms for current word."
-      (interactive)
-      (synonyms-lookup (thing-at-point 'word) nil nil))
+(if (file-exists-p "~/.config/emacs/thesaurus/mthesaur.txt")
+    (use-package synonyms
+      :load-path (lambda () (expand-file-name "~/.config/emacs/contrib/synonyms/"))
+      :init ;; executed before loading package
+      (setq synonyms-file        "~/.config/emacs/thesaurus/mthesaur.txt")
+      (setq synonyms-cache-file  "~/.config/emacs/thesaurus/vkcachefile")
+      :config
+      (defun my-synonym-current-word ()
+        "Lookup synonyms for current word."
+        (interactive)
+        (synonyms-lookup (thing-at-point 'word) nil nil))
+      :bind (:map my-map ("S" . my-synonym-current-word))
+      )
+  (message ("Could not locate \"~/.config/emacs/thesaurus/mthesaur.txt\""))
   )
-(message ("»»» I could not locate \"~/.config/emacs/thesaurus/mthesaur.txt\""))
-)
 
 (use-package define-word
   :ensure t
-)
+  )
+
+(use-package csv-mode
+  :load-path (lambda () (expand-file-name "~/.config/emacs/contrib/csv-mode/"))
+  :config
+  (add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
+  (autoload 'csv-mode "csv-mode"
+    "Major mode for editing comma-separated value files." t))
+
+(use-package filetags
+  :ensure t
+  :config
+  (setq filetags-enforce-controlled-vocabulary nil) ;; let me invent new tags on the fly (might not be a good idea anyway!)
+  (setq filetags-load-controlled-vocabulary-from-file t)) ;; read CV from .filetags files within same or upper directories
+  
+(use-package date2name
+  :ensure t
+  :config
+  (setq date2name-enable-smart-separation-character-chooser t)
+  (defun file-attribute-modification-time (attributes)
+    "extracts the modification time from ATTRIBUTES"
+    (nth 5 attributes)))
+
+;; Org-Mode
+(defun my-org-mode-setup ()
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1))
+
+(use-package org
+  :hook  (org-mode . my-org-mode-setup)
+  :config
+  (setq org-ellipsis " ↓"))
+
+(dolist (face '((org-level-1 . 1.2)
+                (org-level-2 . 1.1)
+                (org-level-3 . 1.05)
+                (org-level-4 . 1.0)
+                (org-level-5 . 1.0)
+                (org-level-6 . 1.0)
+                (org-level-7 . 1.0)
+                (org-level-8 . 1.0)))
+  (set-face-attribute (car face) nil :font "DejaVu Sans" :height (cdr face) :weight 'regular))
+
+(set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-table nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+
+;; Key Bindings
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c c") 'org-capture)
+
+;; Capture-Templates
+(setq org-capture-templates
+      '(("b" "Bookmark" entry (file+headline "~/org/misc.org" "Bookmarks")
+         "* %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n")
+        ("c" "Contact" entry (file+headline "~/org/misc.org" "Contacts")
+         "* %?\n:PROPERTIES:\n:TITLE: \n:BIRTHDAY: %^t\n:PHONE: \n:MOBILE: \n:EMAIL: \n:STREET: \n:POSTALCODE: \n:CITY: \n:COUNTRY: \n:COMPANY: \n:WORKPHONE: \n:WORKMAIL: \n:CREATED: %u\n:END:\n")
+        ("t" "TODO [inbox]" entry (file+headline "~/org/gtd/inbox.org" "Inbox")
+         "* TODO %i%?" :prepend 1)
+        ("T" "Tickler" entry (file+headline "~/org/gtd/tickler.org" "Tickler")
+         "* %^t %i%?" :prepend 1)))
+(setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+
+;; Agenda
+(setq org-agenda-files '("~/org/gtd/inbox.org"
+                         "~/org/gtd/gtd.org"
+                         "~/org/gtd/tickler.org"
+                         "~/org/misc.org"))
+(setq org-refile-targets '(("~/org/gtd/gtd.org" :maxlevel . 3)
+                           ("~/org/gtd/someday.org" :level . 1)
+                           ("~/org/gtd/tickler.org" :maxlevel . 2)))
+(setq org-agenda-include-diary t)
+(setq org-agenda-prefix-format
+      '((todo . "%b %i %-12:c")))
+(setq org-agenda-custom-commands
+      '(("D" "Daily Review"
+         ((agenda "" ((org-agenda-span 7)))
+          (todo "TODO")
+          (todo "WAITING")))
+        ("W" "Weekly Review"
+         ((agenda "" ((org-agenda-span 14)))
+          (todo "WAITING")
+          (stuck "" ((org-agenda-files '("~/org/gtd/inbox.org"
+					 "~/org/gtd/gtd.org"
+					 "~/org/gtd/tickler.org"
+					 "~/org/gtd/someday.org"))))))))
+
 
 ;; Hydras
 ;; F-Key Settings for Hydras
 (setq my-f-key-settings (concat
-" ⇧               |                   |
-"                                                                  (propertize
-" F1  F2  F3  F4  | F5    F6  F7  F8  | F9       F10  F11      F12
-"                                                                  'face '(:foreground "#859900"))
-"                 | Theme             | Spelling Menu maximize
-
+" ⇧               |                            |
+"                                                                        (propertize
+" F1  F2  F3  F4  | F5    F6      F7  F8       | F9    F10  F11      F12
+"                                                                        'face '(:foreground "#859900"))
+"                 | Theme Toggles     Spelling | Hydra Menu maximize
 "))
 
 (use-package hydra
@@ -255,7 +374,7 @@
 
   ;; apropos training
   (defhydra hydra-apropos (:color blue
-                           :hint nil)
+                                  :hint nil)
     "
   _a_propos        _c_ommand
   _d_ocumentation  _l_ibrary
@@ -270,10 +389,31 @@
     ("e" apropos-value))
   (global-set-key (kbd "C-c h") 'hydra-apropos/body)
 
+  ;; Toggles
+  (defvar whitespace-mode nil)
+  (defhydra hydra-toggle (:color teal)
+    "
+  _f_ auto-fill-mode:    %`auto-fill-function
+  _t_ truncate-lines:    %`truncate-lines
+  _w_ whitespace-mode:   %`whitespace-mode
+  _l_ org link display:  %`org-descriptive-links
+  _a_ abbrev-mode:       %`abbrev-mode
+  _d_ debug-on-error:    %`debug-on-error
+  "
+    ("a" abbrev-mode nil)
+    ("d" toggle-debug-on-error nil)
+    ("f" auto-fill-mode nil)
+    ("t" toggle-truncate-lines nil)
+    ("w" whitespace-mode nil)
+    ("l" org-toggle-link-display nil)
+  )
+  (bind-key "M" #'hydra-toggle/body my-map)
+  (global-set-key (kbd "<f6>") 'hydra-toggle/body)
+  
   ;; spelling
   (defhydra hydra-spelling (:color red)
     (concat my-f-key-settings
-  "
+            "
   ^
   ^Spelling^          ^Errors^            ^Checker^
   ^────────^──────────^──────^────────────^───────^───────
@@ -283,17 +423,129 @@
   _D_efine word
   ^^                  ^^                  ^^
   ")
-  ("q" nil "quit")
-  ("r" flyspell-region nil)
-  ("l" my-toggle-ispell-language nil)
-  ("n" flyspell-goto-next-error nil)
-  ("s" my-synonym-current-word nil :color blue)
-  ("D" define-word-at-point nil :color blue) ;; define-word
-  ("c" flyspell-correct-word-before-point nil)
-  ("b" flyspell-buffer nil)
-  ("m" flyspell-mode nil)
+    ("q" nil "quit")
+    ("r" flyspell-region nil)
+    ("l" my-toggle-ispell-language nil)
+    ("n" flyspell-goto-next-error nil)
+    ("s" my-synonym-current-word nil :color blue)
+    ("D" define-word-at-point nil :color blue) ;; define-word
+    ("c" flyspell-correct-word-before-point nil)
+    ("b" flyspell-buffer nil)
+    ("m" flyspell-mode nil)
+    )
+  (global-set-key (kbd "<f8>") 'hydra-spelling/body)
+    (defhydra hydra-csv (:color blue)
+    (concat my-f-key-settings
+      "
+  ^^
+  _a_lign Fields into Columns     C-c C-a          _B_ Set Buffer's Comment Start       C-c C-c
+  _u_nalign Columns into Fields   C-c C-u          _L_ Sort By Field Lexicographically  C-c C-s
+  ^^                                               _N_ Sort By Field Numerically        C-c C-n
+      _,_  ← Field →  _._           C-M-b/f          _D_ Use Descending Sort Order        C-c C-d
+  ^^                                               _r_everse Order of Lines             C-c C-r
+  _S_ Make Separators Invisible   C-c C-v          _t_ranspose Rows and Columns         C-c C-t
+  _i_ Toggle Field Index Mode                       ^^
+  ^^                                               _k_ Kill Fields          C-c C-k
+  ^^                                               _y_ank Fields (Columns)  C-c C-y
+  ^^                                               _Y_ank As New Table      C-c C-z
+  ^^
+    ")
+    ("a" csv-align-fields        nil :color red)
+    ("u" csv-unalign-fields      nil :color red)
+    ("B" csv-set-comment-start   nil)
+    ("D" csv-toggle-descending   nil)
+    ("k" csv-kill-fields         nil)
+    ("N" csv-sort-numeric-fields nil)
+    ("r" csv-reverse-region      nil)
+    ("L" csv-sort-fields         nil)
+    ("t" csv-transpose           nil)
+    ("S" csv-toggle-invisibility nil :color red)
+    ("y" csv-yank-fields         nil)
+    ("Y" csv-yank-as-new-table   nil)
+    ("." csv-forward-field       nil :color red)
+    ("," (csv-forward-field -1)           nil :color red)
+    ("i" csv-field-index-mode    nil :color red)
+    ("q" nil "quit")
   )
-  (global-set-key (kbd "<f9>") 'hydra-spelling/body))
+
+  (require 'csv-mode)
+  (define-key csv-mode-map [f9] 'hydra-csv/body)
+  
+  (defhydra hydra-dired (:color blue)
+    (concat my-f-key-settings
+  "
+  _t_agtrees            _f_ilter              _d_ate2name        g  refresh           M-c      dired-ranger-copy       M-t   filetags
+  _T_agtrees recursive  _F_ilter recursive    time_2_name        +  mkdir             M-v      dired-ranger-paste      M-a   appendfilename
+  ^────────^────────────^──────^──────────────^─────────^─────   *. mark extensions   M-m      dired-ranger-move
+  _a_bsolute link       ^^                    _D_ate2name.el     D  delete marked
+  _A_bsolute basename   ^^                    ^^                 tk hide marked       C-c C-o  open externally
+  ^^                    ^^                    ^^                 U  unmark all        C-o      open in new frame
+  ^View    ^            ^Edit^                ^Order^            percent ampersand: dired-flag-garbage-files
+  ^────────^────────────^──────^──────────────^─────────^─────   w  copy filename  →  M-0 w    copy absolute filename        T touch/set date
+  _c_ollapse mode       _v_idir (C-x C-q)     _s_ize ordered     C  copy/clone        C-t d    image-dired+ of marked files  M chmod
+  _o_pen in file manager      ^^              _h_uman size       r  rename/move       <percent> l  lowercase                 O chown
+  ^^                    _SPC_ filetags.el     _1_ time ordered   !  pipe to shell     <percent> u  uppercase                 S ln -s
+  ^^                    ^^                    _n_ormal ordered   x  delete flagged    <percent> &  flag temp files           C-x C-f  create file
+  _(_ toggle details    ^^                    ^^                 c  compress
+  ^^                    ^^                    ^^                 Z  dired-do-compress (=unp)
+  ^^                    ^^                    ^^
+  ^^                    ^^                    ^^                 
+  ^^                    ^^                    ^^                 attach to org: _3_ symlink  _4_ ln  _5_ cp  _6_ mv
+  ")
+
+  ("t" my-dired-tagtrees nil)
+  ("T" my-dired-tagtrees-recursive nil)
+
+  ("f" my-dired-filetags-filter nil)
+  ("F" my-dired-filetags-filter-recursive nil)
+
+  ("d" my-dired-date2name nil)
+  ("2" my-dired-time2name nil)
+  ("D" date2name-dired-add-date-to-name nil)
+
+  ("a" my-dired-copy-filename-as-absolute-link nil)
+  ("A" (let ((current-prefix-arg '(4))) ;; emulate C-u
+         (call-interactively 'my-dired-copy-filename-as-absolute-link)
+       )
+   nil)
+
+  ("c" dired-collapse-mode nil)
+  ("o" my-dired-open-in-file-manager nil)
+  ("(" dired-hide-details-mode nil)
+
+  ("v" dired-toggle-read-only nil)
+  ("SPC" filetags-dired-update-tags nil)
+
+  ("s" (dired-sort-other "-alS --group-directories-first") nil)
+  ("h" (dired-sort-other "-alSh --group-directories-first") nil)
+  ("1" (dired-sort-other "-alt --group-directories-first") nil)
+  ("n" (dired-sort-other "-al --group-directories-first") nil)
+
+  ("3" (lambda ()
+                (interactive)
+                (let ((org-attach-method 'lns))
+                  (call-interactively #'org-attach-dired-to-subtree)))
+                  nil)
+  ("4" (lambda ()
+                (interactive)
+                (let ((org-attach-method 'ln))
+                  (call-interactively #'org-attach-dired-to-subtree)))
+                  nil)
+  ("5" (lambda ()
+                (interactive)
+                (let ((org-attach-method 'cp))
+                  (call-interactively #'org-attach-dired-to-subtree)))
+                  nil)
+  ("6" (lambda ()
+                (interactive)
+                (let ((org-attach-method 'mv))
+                  (call-interactively #'org-attach-dired-to-subtree)))
+                  nil)
+
+  ("q" nil "quit"))
+  (define-key dired-mode-map [f1] 'hydra-dired/body))
+
+
 
 
 ;; Modus Themes 4.1.0 configuration
