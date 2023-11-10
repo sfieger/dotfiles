@@ -45,7 +45,11 @@ MapToggle <F9> relativenumber
 
 " UI
 " colortheme
-set background=dark
+if has('gui_running')
+    set background=light
+else
+    set background=dark
+endif
 colorscheme solarized
 call togglebg#map("<F5>")
 highlight SpecialKey ctermfg=darkred
