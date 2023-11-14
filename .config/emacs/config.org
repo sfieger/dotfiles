@@ -1,0 +1,1094 @@
+#+TITLE: SFieger's GNU Emacs Config
+#+AUTHOR: Steffen Fieger (SFieger)
+#+DESCRIPTION: SFieger's personal Emacs config.
+#+STARTUP: showeverything
+#+OPTIONS: toc:2
+
+This is heavily inspired by [[https://www.youtube.com/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][DT's Configuring Emacs Youtube playlist]], some bits and pieces from [[https://github.com/novoid/dot-emacs/blob/master/config.org][Karl Voit's Emacs Config]] and stuff I saw on the internet, but can't remember where its from.
+
+* TABLE OF CONTENTS :toc:
+- [[#important-programs-to-load-first][IMPORTANT PROGRAMS TO LOAD FIRST]]
+  - [[#adding-the-scripts-directory-to-path][Adding the scripts directory to path]]
+  - [[#sourcing-the-scripts][Sourcing the scripts]]
+- [[#all-the-icons][ALL THE ICONS]]
+- [[#backup-files][BACKUP FILES]]
+- [[#company][COMPANY]]
+- [[#csv-mode][CSV-MODE]]
+- [[#dashboard][DASHBOARD]]
+- [[#diminish][DIMINISH]]
+- [[#dired][DIRED]]
+- [[#elfeed][ELFEED]]
+- [[#filetags--date2name][FILETAGS & DATE2NAME]]
+- [[#flycheck][FLYCHECK]]
+- [[#fonts][FONTS]]
+  - [[#setting-the-font-face][Setting the Font Face]]
+  - [[#zooming-inout][Zooming In/Out]]
+- [[#general-keybindings][GENERAL KEYBINDINGS]]
+- [[#german-calendar][GERMAN CALENDAR]]
+- [[#git-programs][GIT PROGRAMS]]
+  - [[#git-time-machine][Git Time Machine]]
+  - [[#magit][Magit]]
+- [[#highlight-todo][HIGHLIGHT TODO]]
+- [[#ivy-counsel][IVY (COUNSEL)]]
+- [[#language-support][LANGUAGE SUPPORT]]
+- [[#neotree][NEOTREE]]
+- [[#org-mode][ORG MODE]]
+  - [[#setup][Setup]]
+  - [[#enabling-table-of-contents][Enabling Table of Contents]]
+  - [[#enabling-org-bullets][Enabling Org Bullets]]
+  - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
+  - [[#capture-templates][Capture Templates]]
+  - [[#agenda][Agenda]]
+- [[#perspective][PERSPECTIVE]]
+- [[#projectile][PROJECTILE]]
+- [[#rainbow-delimiters][RAINBOW DELIMITERS]]
+- [[#rainbow-mode][RAINBOW MODE]]
+- [[#sane-defaults][SANE DEFAULTS]]
+- [[#shells-and-terminals][SHELLS AND TERMINALS]]
+  - [[#eshell][Eshell]]
+  - [[#vterm][Vterm]]
+  - [[#vterm-toggle][Vterm-Toggle]]
+- [[#spelling][SPELLING]]
+- [[#sudo-edit][SUDO EDIT]]
+- [[#theme][THEME]]
+- [[#tldr][TLDR]]
+- [[#which-key][WHICH-KEY]]
+- [[#helper-functions][HELPER FUNCTIONS]]
+  - [[#cycle-ispell-language][Cycle ispell Language]]
+  - [[#cycle-line-numbers][Cycle Line Numbers]]
+  - [[#dired-helper][Dired Helper]]
+
+* IMPORTANT PROGRAMS TO LOAD FIRST
+To keep this =config.org= a reasonable length, I have moved a lot of code to individual scripts that will be sourced by this config. These scripts are found in "~/.config/emacs/scripts" and do not contain any code that most people are likely to need to edit.
+
+** Adding the scripts directory to path
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "~/.config/emacs/contrib/buffer-move")
+  (add-to-list 'load-path "~/.config/emacs/contrib/modus-themes")
+
+  (add-to-list 'load-path "~/.config/emacs/scripts/")
+#+end_src
+
+** Sourcing the scripts
+#+begin_src emacs-lisp
+  (require 'buffer-move)
+
+  (require 'sfieger-elpaca-setup)
+
+  (require 'sfieger-app-launchers)
+#+end_src
+
+* ALL THE ICONS
+This is an icon set that can be used with dashboard, dired, ibuffer and other Emacs programs.
+
+#+begin_src emacs-lisp
+  (use-package all-the-icons
+    :ensure t
+    :if (display-graphic-p))
+
+  (use-package all-the-icons-dired
+    :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+#+end_src
+
+* BACKUP FILES
+By default, Emacs creates automatic backups of files in thear original directories, such "file.el" and the backup "file.el~". This leads to a lot of clutter, so let's tell Emacs to put all backups that it creates in a seperate directory.
+
+#+begin_src emacs-lisp
+  (setq backup-by-copying t                            ; clobber symlinks
+        backup-directory-alist '(("." . "~/.saves/"))  ; don't litter my fs tree
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)                             ; versioned backups
+#+end_src
+
+* COMPANY
+[[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. The name stands for "complete anything". Completion will start automatically after you type a few letters.
+Use M-n and M-p to select, <return> to complete or <tab> to complete the common part.
+
+#+begin_src emacs-lisp
+  (use-package company
+    :defer 2
+    :diminish
+    :custom
+    (company-begin-commands '(self-insert-command))
+    (company-idle-delay .1)
+    (company-minimum-prefix-length 2)
+    (company-show-numbers t)
+    (company-tooltip-align-annotations 't)
+    (global-company-mode t))
+
+  (use-package company-box
+    :after company
+    :diminish
+    :hook (company-mode . company-box-mode))
+#+end_src
+
+* CSV-MODE
+#+begin_src emacs-lisp
+  (use-package csv-mode
+    :ensure t
+    :defer 110
+    :config
+    (add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
+    (autoload 'csv-mode "csv-mode"
+      "Major mode for editing comma-separated value files." t))
+#+end_src
+
+* DASHBOARD
+Emacs Dashboard is an extensible startup screen showing you recent files, bookmarks, agenda items und an Emacs banner.
+
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :init
+    (setq initial-buffer-choice 'dashboard-open)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
+    (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+    (setq dashboard-center-content nil)   ;; set to 't' for centered content
+    (setq dashboard-icon-type 'all-the-icons)
+    (setq dashboard-items '((recents . 5)
+                            (agenda . 5 )
+                            (bookmarks . 3)
+                            (projects . 3)
+                            (registers . 3)))
+    :custom
+    (dashboard-modify-heading-icons '((recents . "file-text")
+                                      (bookmarks . "book")))
+    :config
+    (dashboard-setup-startup-hook))
+#+end_src
+
+* DIMINISH
+This package implements hiding or abbreviation of the modeline displays (lighters) of minor-modes. With this package installed, you can add ':diminish' to any use-package block to hide that particular mode in the modeline.
+
+#+begin_src emacs-lisp
+  (use-package diminish)
+#+end_src
+
+* DIRED
+#+begin_src emacs-lisp
+  (use-package dired-open
+    ;; TODO fuer Debian konfigurieren
+    ;; :config
+    ;; (setq dired-open-extensions '(("gif" . "sxiv")
+    ;;                               ("jpg" . "sxiv")
+    ;;                               ("png" . "sxiv")
+    ;;                               ("mkv" . "mpv")
+    ;;                               ("mp4" . "mpv")))
+    )
+
+  (use-package dired-preview
+    :after dired)
+#+end_src
+
+* ELFEED
+An RSS newsfeed reader for Emacs.
+
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :config
+    (setq elfeed-search-feed-face ":foreground #ffffff :weight bold"
+          elfeed-feeds (quote
+                        (("https://www.reddit.com/r/linux.rss" reddit linux)
+                         ("https://www.reddit.com/r/commandline.rss" reddit commandline)
+                         ("https://www.reddit.com/r/distrotube.rss" reddit distrotube)
+                         ("https://www.reddit.com/r/emacs.rss" reddit emacs)
+                         ("https://hackaday.com/blog/feed/" hackaday linux)))))
+
+  (use-package elfeed-goodies
+    :init
+    (elfeed-goodies/setup)
+    :config
+    (setq elfeed-goodies/entry-pane-size 0.5))
+#+end_src
+
+* FILETAGS & DATE2NAME
+[[https://github.com/novoid/filetags][filetags]] and [[https://github.com/novoid/date2name][date2name]] are tools by Karl Voit for tagging and timestamping filenames.
+
+#+begin_src emacs-lisp
+  (use-package filetags
+    :ensure t
+    :config
+    (setq filetags-enforce-controlled-vocabulary nil)        ;; let me invent new tags on the fly (might not be a good idea anyway!)
+    (setq filetags-load-controlled-vocabulary-from-file t))  ;; read CV from .filetags files within same or upper directories
+
+  (use-package date2name
+    :ensure t
+    :config
+    (setq date2name-enable-smart-separation-character-chooser t)
+    (defun file-attribute-modification-time (attributes)
+      "extracts the modification time from ATTRIBUTES"
+      (nth 5 attributes)))
+#+end_src
+
+* FLYCHECK
+Install =luacheck= from your Linux distro's repositories for flycheck to work correctly with lua files.
+Install =python-pylint= for flycheck to work with python files.
+Haskell works with flycheck as long as =haskell-ghc= or =haskell-stack-ghc= is installed.
+For more information on language support for flycheck, [[https://www.flycheck.org/en/latest/languages.html][read this]].
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :defer t
+    :diminish
+    :init (global-flycheck-mode))
+#+end_src
+
+* FONTS
+Defining the various fonts that Emacs will use.
+
+** Setting the Font Face
+#+begin_src emacs-lisp
+  (set-face-attribute 'default nil
+                      :font "DejaVu Sans Mono"
+                      :height 100)
+  (set-face-attribute 'fixed-pitch nil
+                      :font "DejaVu Sans Mono"
+                      :height 100)
+  (set-face-attribute 'variable-pitch nil
+                      :font "DejaVu Sans"
+                      :height 100)
+
+  ;; This sets the default font on all graphical frames created after restarting Emacs.
+  ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+  ;; are not right unless I also add this method of setting the default font.
+  (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
+#+end_src
+
+** Zooming In/Out
+You can use the bindings CTRL plus +/- for zooming in/out.  You can also use CTRL plus the mouse wheel for zooming in/out.
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-+") 'text-scale-increase)
+  (global-set-key (kbd "C--") 'text-scale-decrease)
+  (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+  (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+#+end_src
+
+* GENERAL KEYBINDINGS
+#+begin_src emacs-lisp
+  (use-package general
+    :config
+    ;; set up 'C-.' as the global leader key
+    (general-create-definer sfieger/leader-keys
+      :keymaps 'override
+      :prefix "C-."
+      :global-prefix "C-.")
+
+    (sfieger/leader-keys
+      "p" '(projectile-command-map :wk "Projectile")
+      "P" '(perspective-map :wk "Perspective")
+      "u" '(universal-argument :wk "Universal argument"))
+
+    (sfieger/leader-keys
+      "b" '(:ignore t :wk "Buffer/Bookmarks")
+      "b b" '(switch-to-buffer :wk "Switch to buffer")
+      "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+      "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in a new window")
+      "b i" '(ibuffer :w "IBuffer")
+      "b k" '(kill-this-buffer :wk "Kill this buffer")
+      "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b R" '(rename-buffer :wk "Rename buffer")
+      "b s" '(basic-save-buffer :wk "Save buffer")
+      "b S" '(save-some-buffers :wk "Save multiple buffers")
+
+      ;; Bookmarks
+      "b d" '(bookmark-delete :wk "Delete bookmark")       
+      "b l" '(list-bookmarks :wk "List bookmarks")
+      "b m" '(bookmark-set :wk "Set bookmark")
+      "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
+
+    (sfieger/leader-keys csv-mode-map
+      "c" '(:ignore t :wk "CSV")
+      "c a" '(csv-align-fields :wk "Align Fields into columns")
+      "c A" '(csv-unalign-fields :wk "Unalign columns into fields")
+      "c b" '(csv-set-comment-start :wk "Set buffer's comment start")
+      "c i" '(csv-field-index-mode :wk "Toggle field index mode")
+      "c k" '(csv-kill-fields :wk "Kill fields")
+	  "c r" '(csv-reverse-region :wk "Reverse order of lines")
+      "c S" '(csv-toggle-invisibility :wk "Toggle invisibil seperators")
+      "c t" '(csv-transpose :wk "Transpose rows and columns")
+      "c y" '(csv-yank-fields :wk "Yank fields")
+      "c Y" '(csv-yank-as-new-table :wk "Yank as new table"))
+
+      (sfieger/leader-keys csv-mode-map
+      "c s" '(:ignore t :wk "Sort")
+      "c s d" '(csv-toggle-descending :wk "Toggle descending sort order")
+      "c s l" '(csv-sort-fields :wk "Sort by field lexicographically")
+      "c s n" '(csv-sort-numeric-fields :wk "Sort by field numerically"))
+
+    (sfieger/leader-keys
+      "C" '(:ignore t :wk "Comment")
+      "C l" '(comment-line :wk "Comment lines"))
+
+    (sfieger/leader-keys
+      "d" '(:ignore t :wk "Dired")
+      "d d" '(dired :wk "Open dired")
+      "d j" '(dired-jump :wk "Dired jump to current")
+      "d n" '(neotree-dir :wk "Open directory in neotree"))
+
+    (sfieger/leader-keys dired-mode-map
+      "d a" '(sfieger-dired-copy-filename-as-absolute-link :wk "Absolute link")
+      "d p" '(dired-preview-mode :wk "Dired preview")
+      "d w" '(wdired-change-to-wdired-mode :wk "Writeabe dired")
+      "d W" '(wdired-finish-edit :wk "Writable dired finish edit"))
+
+    (sfieger/leader-keys dired-mode-map
+      "d f" '(:ignore t :wk "Filetags")
+      "d f d" '(date2name-dired-add-date-to-name :wk "Add date to filenames")
+      "d f D" '(date2name-dired-add-datetime-to-name :wk "Add datetime to filenamens")
+      "d f e" '(filetags-dired-update-tags :wk "Edit tags")
+      "d f f" '(sfieger-dired-filetags-filter :wk "Run filetags filter")
+      "d f F" '(sfieger-dired-filetags-filter-recursive :wk "Run recursive filetags filter")
+      "d f t" '(sfieger-dired-tagtrees :wk "Run tagtrees")
+      "d f T" '(sfieger-dired-tagtrees-recursive :wk "Run recursive tagtrees"))
+
+    (sfieger/leader-keys dired-mode-map
+      "d s" '(:ignore t :wk "Sort order")
+      "d s h" '((lambda ()
+                  (interactive)
+                  (dired-sort-other "-alSh --group-directories-first"))
+                :wk "Human size")
+      "d s n" '((lambda ()
+                  (interactive)
+                  (dired-sort-other "-al --group-directories-first"))
+                :wk "Normal ordered")
+      "d s s" '((lambda ()
+                  (interactive)
+                  (dired-sort-other "-alS --group-directories-first"))
+                :wk "Size ordered")
+      "d s t" '((lambda ()
+                  (interactive)
+                  (dired-sort-other "-alt --group-directories-first"))
+                :wk "Time ordered"))
+
+    (sfieger/leader-keys
+      "e" '(:ignore t :wk "Eshell/Evaluate")
+      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+      "e d" '(eval-defun :wk "Evaluate defun containing or after point")
+      "e e" '(eval-expression :wk "Evaluate an elisp expression")
+      "e h" '(counsel-esh-history :wk "Eshell history")
+      "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+      "e r" '(eval-region :wk "Evaluate elisp in region")
+      "e R" '(eww-reload :wk "Reload current page in EWW")
+      "e s" '(eshell :wk "Eshell")
+      "e w" '(eww :wk "EWW emacs web wowser"))
+
+    (sfieger/leader-keys
+      "f" '(:ignore t :wk "Files")
+      "f c" '((lambda ()
+                (interactive)
+                (find-file "~/.config/emacs/config.org"))
+              :wk "Edit emacs config")
+      "f d" '(find-grep-dired :wk "Search for string in files in DIR")
+      "f e" '((lambda ()
+                (interactive)
+                (dired "~/.config/emacs/"))
+              :wk "Open user-emacs-directory in dired")
+      "f f" '(find-file :wk "Find File")
+      "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
+      "f i" '((lambda () (interactive)
+                (find-file "~/.config/emacs/init.el"))
+              :wk "Open emacs init.el")
+      "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
+      "f l" '(counsel-locate :wk "Locate a file")
+      "f r" '(counsel-recentf :wk "Find recent files")
+      "f u" '(sudo-edit-find-file :wk "sudo find file")
+      "f U" '(sudo-edit :wk "sudo edit file"))
+
+    (sfieger/leader-keys
+      "g" '(:ignore t :wk "Git")
+      "g /" '(magit-displatch :wk "Magit dispatch")
+      "g ." '(magit-file-displatch :wk "Magit file dispatch")
+      "g b" '(magit-branch-checkout :wk "Switch branch")
+      "g C" '(magit-clone :wk "Clone repo")
+      "g F" '(magit-fetch :wk "Git fetch")
+      "g g" '(magit-status :wk "Magit status")
+      "g i" '(magit-init :wk "Initialize git repo")
+      "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+      "g r" '(vc-revert :wk "Git revert file")
+      "g s" '(magit-stage-file :wk "Git stage file")
+      "g t" '(git-timemachine :wk "Git time machine")
+      "g u" '(magit-stage-file :wk "Git unstage file"))
+
+    (sfieger/leader-keys
+      "g c" '(:ignore t :wk "Create")
+      "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+      "g c c" '(magit-commit-create :wk "Create commit")
+      "g c f" '(magit-commit-fixup :wk "Create fixup commit"))
+
+    (sfieger/leader-keys
+      "g f" '(:ignore t :wk "Find")
+      "g f c" '(magit-show-commit :wk "Show commit")
+      "g f f" '(magit-find-file :wk "Magit find file")
+      "g f g" '(magit-find-git-config-file :wk "Find gitconfig file"))
+
+    (sfieger/leader-keys
+      "h" '(:ignore t :wk "Help")
+      "h a" '(counsel-apropos :wk "Apropos")
+      "h b" '(describe-bindings :wk "Describe bindings")
+      "h c" '(describe-char :wk "Describe character under cursor")
+      "h e" '(view-echo-area-messages :wk "View echo area messages")
+      "h f" '(describe-function :wk "Describe function")
+      "h F" '(describe-face :wk "Describe face")
+      "h g" '(describe-gnu-project :wk "Describe GNU Project")
+      "h i" '(info :wk "Info")
+      "h I" '(describe-input-method :wk "Describe input method")
+      "h k" '(describe-key :wk "Describe key")
+      "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
+      "h L" '(describe-language-environment :wk "Describe language environment")
+      "h m" '(describe-mode :wk "Describe mode")
+      "h v" '(describe-variable :wk "Describe variable")
+      "h w" '(where-is :wk "Prints keybinding for command if set")
+      "h x" '(describe-command :wk "Display full documentation for command"))
+
+    (sfieger/leader-keys
+      "h r" '(:ignore t :wk "Reload")
+      "h r r" '((lambda () (interactive)
+                  (load-file "~/.config/emacs/init.el")
+                  (ignore (elpaca-process-queues)))
+                :wk "Reload emacs config"))
+
+    (sfieger/leader-keys
+      "h d" '(:ignore t :wk "Emacs documentation")
+      "h d a" '(about-emacs :wk "About Emacs")
+      "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+      "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+      "h d m" '(info-emacs-manual :wk "The Emacs manual")
+      "h d n" '(view-emacs-news :wk "View Emacs news")
+      "h d o" '(describe-distribution :wk "How to obtain Emacs")
+      "h d p" '(view-emacs-problems :wk "View Emacs problems")
+      "h d t" '(view-emacs-todo :wk "View Emacs todo")
+      "h d w" '(describe-no-warranty :wk "Describe no warranty"))
+
+    (sfieger/leader-keys
+      "m" '(:ignore t :wk "Org")
+      "m a" '(org-agenda :wk "Org agenda")
+      "m B" '(org-babel-tangle :wk "Org babel tangle")
+      "m c" '(org-capture :wk "Org capture")
+      "m e" '(org-export-dispatch :wk "Org export dispatch")
+      "m i" '(org-toggle-item :wk "Org toggle item")
+      "m l" '(org-store-link :wk "Org store link")
+      "m t" '(org-todo :wk "Org todo")
+      "m T" '(org-todo-list :wk "Org todo list"))
+
+    (sfieger/leader-keys
+      "m b" '(:ignore t :wk "Tabels")
+      "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
+
+    (sfieger/leader-keys
+      "m d" '(:ignore t :wk "Date/Deadline")
+      "m d t" '(org-time-stamp :wk "Org time stamp"))
+
+    (sfieger/leader-keys
+      "o" '(:ignore t :wk "Open")
+      "o d" '(dashboard-open :wk "Dashboard")
+      "o e" '(elfeed :wk "Elfeed RSS")
+      "o f" '(make-frame :wk "Open buffer in new frame")
+      "o F" '(select-frame-by-name :wk "Select frame by name"))
+
+    (sfieger/leader-keys
+      "s" '(:ignore t :wk "Search")
+      "s d" '(dictionary-search :wk "Search dictionary")
+      "s m" '(man :wk "Man pages")
+      "s t" '(tldr :wk "Lookup TLDR docs for a command")
+      "s w" '(woman :wk "Similar to man but doesn't require man"))
+
+    (sfieger/leader-keys
+      "S" '(:ignore t :wk "Spelling")
+      "S b" '(flyspell-buffer :wk "Check buffer")
+      "S c" '(flyspell-correct-word-before-point :wk "Correct word before point")
+      "S d" '(define-word-at-point :wk "Define word at point")
+      "S l" '(sfieger-cycle-ispell-language :wk "Cycle language")
+      "S n" '(flyspell-goto-next-error :wk "Goto next error")
+      "S r" '(flyspell-region :wk "Check region"))
+
+    (sfieger/leader-keys
+      "t" '(:ignore t :wk "Toggle")
+      "t c" '(modus-themes-toggle :wk "Toggle color theme")
+      "t e" '(eshell-toggle :wk "Toggle eshell")
+      "t f" '(flycheck-mode :wk "Toggle flycheck")
+      "t l" '(sfieger-cycle-line-numbers :wk "Cycle line numbers")
+      "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
+      "t r" '(rainbow-mode :wk "Toggle rainbow mode")
+      "t s" '(flyspell-mode :wk "Toggle flyspell mode")
+      "t t" '(visual-line-mode :wk "Toggle truncated lines")
+      "t v" '(vterm-toggle :wk "Toggle vterm")
+      "t w" '(whitespace-mode :wk "Toggle whitespace characters"))
+
+    (sfieger/leader-keys
+      "w" '(:ignore t :wk "Windows")
+      "w c" '(delete-window :wk "Close Window")
+      "w m" '(delete-other-windows :wk "Maximize Window")
+      "w s" '(split-window-vertically :wk "Horizontal split window")
+      "w v" '(split-window-horizontally :wk "Vertical split window")
+      "w w" '(other-window :wk "Goto next window")
+
+      ;; Window motions
+      "w <left>" '(windmove-left :wk "Window left")
+      "w <down>" '(windmove-down :wk "Window down")
+      "w <up>" '(windmove-up :wk "Window up")
+      "w <right>" '(windmove-right :wk "Window right")
+
+      ;; Move Windows
+      "w <C-left>" '(buf-move-left :wk "Buffer move left")
+      "w <C-down>" '(buf-move-down :wk "Buffer move down")
+      "w <C-up>" '(buf-move-up :wk "Buffer move up")
+      "w <C-right>" '(buf-move-right :wk "Buffer move right"))
+    )
+#+end_src
+
+* GERMAN CALENDAR
+Setting up the calendar to be German. E.g. week start day, day and month names and holidays.
+
+#+begin_src emacs-lisp
+  (setq-default calendar-week-start-day 1
+                calendar-day-name-array ["Sonntag" "Montag" "Dienstag" "Mittwoch"
+                                         "Donnerstag" "Freitag" "Samstag"]
+                calendar-month-name-array ["Januar" "Februar" "März" "April" "Mai"
+                                           "Juni" "Juli" "August" "September"
+                                           "Oktober" "November" "Dezember"])
+  (setq solar-n-hemi-seasons
+        '("Frühlingsanfang" "Sommeranfang" "Herbstanfang" "Winteranfang"))
+
+  ;; General German Holidyas
+  (setq holiday-general-holidays
+        '((holiday-fixed 1 1 "Neujahr")
+          (holiday-fixed 5 1 "1. Mai")
+          (holiday-fixed 10 3 "Tag der Deutschen Einheit")))
+
+  ;; Holidays for the states
+  (setq holiday-christian-holidays
+        '(;; (holiday-fixed 1 6 "Heilige Drei Könige")     ;; BW, BY, ST
+          (holiday-easter-etc  -2 "Karfreitag")
+          (holiday-easter-etc   0 "Ostersonntag")
+          (holiday-easter-etc  +1 "Ostermontag")
+          (holiday-easter-etc +39 "Christi Himmelfahrt")
+          (holiday-easter-etc +49 "Pfingstsonntag")
+          (holiday-easter-etc +50 "Pfingstmontag")
+          (holiday-easter-etc +60 "Fronleichnam")          ;; BW, BY, HE, NW, RP, SL, (SN), (TH)
+          ;; (holiday-fixed 8 15 "Mariä Himmelfahrt")      ;; (BY), SL
+          ;; (holiday-fixed 11 31 "Reformationstag")       ;; BB, HB, HH, MV, NI, SN, ST, SH TH
+          (holiday-fixed 11 1 "Allerheiligen")             ;; BW, BY, NW, RP, SL
+          ;; (holiday-float 11 3 1 "Buss- und Bettag" 16)  ;; SN 
+          (holiday-float 12 0 -4 "1. Advent" 24)
+          (holiday-float 12 0 -3 "2. Advent" 24)
+          (holiday-float 12 0 -2 "3. Advent" 24)
+          (holiday-float 12 0 -1 "4. Advent" 24)
+          (holiday-fixed 12 25 "1. Weihnachtstag")
+          (holiday-fixed 12 26 "2. Weihnachtstag")))
+
+  (setq holiday-local-holidays
+        '(;; (holiday-fixed 3 8 "Frauentag")                      ;; BE, MV
+          (holiday-easter-etc -48 "Rosenmontag")
+          ;; (holiday-fixed 8 8 "Augsburger Hohes Friedensfest")  ;; BY
+          ;; (holiday-fixed 9 20 "Weltkindertag")                 ;; TH
+          ;; (holiday-fixed 11 11 "Elfter im Elften")
+          (holiday-fixed 12 24 "Heiligabend")
+          (holiday-fixed 12 31 "Silvester")))
+
+  (setq holiday-hebrew-holidays nil
+        holiday-islamic-holidays nil
+        holiday-bahai-holidays nil
+        holiday-oriental-holidays nil
+        holiday-solar-holidays nil)
+#+end_src
+
+* GIT PROGRAMS
+** Git Time Machine
+[[https://github.com/emacsmirror/git-timemachine][git-timemachine]] is a program that allows you to move backwards and forwards through a file's commits. 'C-. g t' will open the time machine on a file if it is in a git repo.
+
+#+begin_src emacs-lisp
+  (use-package git-timemachine)
+#+end_src
+
+** Magit
+[[https://magit.vc/manual/][Magit]] is a full-featured git client for Emacs.
+
+#+begin_src emacs-lisp
+  (use-package magit)
+#+end_src
+
+* HIGHLIGHT TODO
+Adding highlights to TODO and related words.
+
+#+begin_src emacs-lisp
+  (use-package hl-todo
+    :hook ((org-mode . hl-todo-mode)
+           (prog-mode . hl-todo-mode))
+    :config
+    (setq hl-todo-highlight-punctuation ":"
+          hl-todo-keyword-faces
+          `(("TODO"       warning bold)
+            ("FIXME"      error bold) 
+            ("HACK"       font-lock-constant-face bold)
+            ("REVIEW"     font-lock-keyword-face bold)
+            ("NOTE"       success bold)
+            ("DEPRECATED" font-lock-doc-face bold))))
+#+end_src
+
+* IVY (COUNSEL)
++ Ivy, a generic completion mechanism for Emacs.
++ Counsel, a collection of Ivy-enhanced versions of common Emacs commands.
++ Ivy-rich allows us to add descriptions alongside the commands in M-x.
+
+#+begin_src emacs-lisp
+  (use-package counsel
+    :after ivy
+    :diminish
+    :config (counsel-mode))
+
+  (use-package ivy
+    :bind
+    ;; ivy-resume resumes the last Ivy-based completion.
+    (("C-c C-r" . ivy-resume)
+     ("C-x B" . ivy-switch-buffer-other-window)
+     ("C-s" . swiper))
+    :diminish
+    :custom
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq enable-recursive-minibuffers t)
+    :config
+    (ivy-mode))
+
+  (use-package all-the-icons-ivy-rich
+    :ensure t
+    :init (all-the-icons-ivy-rich-mode 1))
+
+  (use-package ivy-rich
+    :after ivy
+    :ensure t
+    :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+    :custom
+    (ivy-virtual-abbreviate 'full
+                            ivy-rich-switch-buffer-align-virtual-buffer t
+                            ivy-rich-path-style 'abbrev)
+    :config
+    (ivy-set-display-transformer 'ivy-switch-buffer
+                                 'ivy-rich-switch-buffer-transformer))
+#+end_src
+
+* LANGUAGE SUPPORT
+Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM, AWK, C, C++, Fortran, Icon, IDL (CORBA), IDLWAVE, Java, Javascript, M4, Makefiles, Metafont, Modula2, Object Pascal, Objective-C, Octave, Pascal, Perl, Pike, PostScript, Prolog, Python, Ruby, Simula, SQL, Tcl, Verilog, and VHDL.
+Other languages will require you to install additional modes.
+
+#+begin_src emacs-lisp
+  (use-package haskell-mode)
+  (use-package lua-mode)
+  (use-package php-mode)
+#+end_src
+
+* NEOTREE
+Neotree is a file tree viewer. When you open neotree, it jumps to the current file thanks to neo-smart-open. The neo-window-fixed-size setting makes the neotree width be adjustable. NeoTree provides following themes: classic, ascii, arrow, icons, and nerd. Theme can be configed by setting "two" themes for neo-theme: one for the GUI and one for the terminal.
+
+| COMMAND        | DESCRIPTION                 | KEYBINDING |
+|----------------+-----------------------------+------------|
+| neotree-toggle | /Toggle neotree/            | C-. t n    |
+| neotree- dir   | /Open directory in neotree/ | C-. d n    |
+
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :config
+    (setq neo-smart-open t
+          ;; show hidden-files
+          neo-show-hidden-files t
+          neo-window-width 55
+          neo-window-fixed-size nil
+          inhibit-compacting-font-caches t
+          projectile-switch-project-action 'neotree-projectile-action) 
+    ;; truncate long file names in neotree
+    (add-hook 'neo-after-create-hook
+              #'(lambda (_)
+                  (with-current-buffer (get-buffer neo-buffer-name)
+                    (setq truncate-lines t)
+                    (setq word-wrap nil)
+                    (make-local-variable 'auto-hscroll-mode)
+                    (setq auto-hscroll-mode nil)))))
+#+end_src
+
+* ORG MODE
+** Setup
+#+begin_src emacs-lisp
+  (setq org-ellipsis " ↓")
+  (add-hook 'org-mode-hook (lambda () (variable-pitch-mode 1)))
+#+end_src
+
+** Enabling Table of Contents
+#+begin_src emacs-lisp
+  (use-package toc-org
+    :commands toc-org-enable
+    :init
+    (add-hook 'org-mode-hook 'toc-org-enable))
+#+end_src
+
+** Enabling Org Bullets
+Org-bullets gives attractive bullets rather than asterisks.
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (use-package org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+end_src
+
+** Source Code Block Tag Expansion
+Org-tempo is not a separate package but a module within org that can be enabled. Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.  Other expansions available include:
+
+| Typing the below + TAB | Expands to ...                            |
+|------------------------+-------------------------------------------|
+| <a                     | '#+BEGIN_EXPORT ascii' ... '#+END_EXPORT' |
+| <c                     | '#+BEGIN_CENTER' ... '#+END_CENTER'       |
+| <C                     | '#+BEGIN_COMMENT' ... '#+END_COMMENT'     |
+| <e                     | '#+BEGIN_EXAMPLE' ... '#+END_EXAMPLE'     |
+| <E                     | '#+BEGIN_EXPORT' ... '#+END_EXPORT'       |
+| <h                     | '#+BEGIN_EXPORT html' ... '#+END_EXPORT'  |
+| <l                     | '#+BEGIN_EXPORT latex' ... '#+END_EXPORT' |
+| <q                     | '#+BEGIN_QUOTE' ... '#+END_QUOTE'         |
+| <s                     | '#+BEGIN_SRC' ... '#+END_SRC'             |
+| <v                     | '#+BEGIN_VERSE' ... '#+END_VERSE'         |
+
+#+begin_src emacs-lisp
+  (require 'org-tempo)
+#+end_src
+
+** Capture Templates
+#+begin_src emacs-lisp
+  (setq org-capture-templates
+        '(("b" "Bookmark" entry (file+headline "~/org/misc.org" "Bookmarks")
+           "* %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n")
+          ("c" "Contact" entry (file+headline "~/org/misc.org" "Contacts")
+           "* %?\n:PROPERTIES:\n:TITLE: \n:BIRTHDAY: %^t\n:PHONE: \n:MOBILE: \n:EMAIL: \n:STREET: \n:POSTALCODE: \n:CITY: \n:COUNTRY: \n:COMPANY: \n:WORKPHONE: \n:WORKMAIL: \n:CREATED: %u\n:END:\n")
+          ("t" "TODO [inbox]" entry (file+headline "~/org/gtd/inbox.org" "Inbox")
+           "* TODO %i%?" :prepend 1)
+          ("T" "Tickler" entry (file+headline "~/org/gtd/tickler.org" "Tickler")
+           "* %^t %i%?" :prepend 1)))
+  (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+#+end_src
+
+** Agenda
+#+begin_src emacs-lisp
+  (setq org-agenda-files '("~/org/gtd/inbox.org"
+                           "~/org/gtd/gtd.org"
+                           "~/org/gtd/tickler.org"
+                           "~/org/misc.org"))
+  (setq org-refile-targets '(("~/org/gtd/gtd.org" :maxlevel . 3)
+                             ("~/org/gtd/someday.org" :level . 1)
+                             ("~/org/gtd/tickler.org" :maxlevel . 2)))
+  (setq org-agenda-include-diary t)
+  (setq org-agenda-prefix-format
+        '((todo . "%b %i %-12:c")))
+  (setq org-agenda-custom-commands
+        '(("D" "Daily Review"
+           ((agenda "" ((org-agenda-span 7)))
+            (todo "TODO")
+            (todo "WAITING")))
+          ("W" "Weekly Review"
+           ((agenda "" ((org-agenda-span 14)))
+            (todo "WAITING")
+            (stuck "" ((org-agenda-files '("~/org/gtd/inbox.org"
+                                           "~/org/gtd/gtd.org"
+                                           "~/org/gtd/tickler.org"
+                                           "~/org/gtd/someday.org"))))))))
+#+end_src
+
+* PERSPECTIVE
+[[https://github.com/nex3/perspective-el][Perspective]] provides multiple named workspaces (or "perspectives") in Emacs, similar to multiple desktops in window managers. Each perspective has its own buffer list and its own window layout, along with some other isolated niceties, like the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]] ring.
+
+#+begin_src emacs-lisp
+  (use-package perspective
+    :custom
+    ;; NOTE: I have also set 'C-. P' to open the perspective menu.
+    ;; HACK: I'm only setting the additional binding because setting it
+    ;; helps suppress an annoying warning message.
+    (persp-mode-prefix-key (kbd "C-c M-p"))
+    :init
+    (persp-mode)
+    :config
+    ;; Sets a file to write to when we save states
+    (setq persp-state-default-file "~/.config/emacs/sessions"))
+
+  ;; This will group buffers by persp-name in ibuffer.
+  (add-hook 'ibuffer-hook
+            (lambda ()
+              (persp-ibuffer-set-filter-groups)
+              (unless (eq ibuffer-sorting-mode 'alphabetic)
+                (ibuffer-do-sort-by-alphabetic))))
+
+  ;; Automatically save perspective states to file when Emacs exits.
+  (add-hook 'kill-emacs-hook #'persp-state-save)
+#+end_src
+
+* PROJECTILE
+[[https://github.com/bbatsov/projectile][Projectile]] is a project interaction library for Emacs. It should be noted that many projectile commands do not work if you have set "fish" as the "shell-file-name" for Emacs.
+
+#+begin_src emacs-lisp
+  (use-package projectile
+    :config
+    (projectile-mode 1))
+#+end_src
+
+* RAINBOW DELIMITERS
+Adding rainbow coloring to parentheses.
+
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
+           (clojure-mode . rainbow-delimiters-mode)))
+#+end_src
+
+* RAINBOW MODE
+Display the actual color as a background for any hey color value (ex. #ffffff). The code block below enables rainbow-mode in all progamming modes (prog-mode) as well as org-mode, which is why rainbow works in this document.
+
+#+begin_src emacs-lisp
+  (use-package rainbow-mode
+    :diminish
+    :hook
+    ((org-mode prog-mode) . rainbow-mode))
+#+end_src
+
+* SANE DEFAULTS
+The following settings are simple modes that are enabled (or disabled) so that Emacs functions more like you would expect a proper editor/IDE to function.
+
+#+begin_src emacs-lisp
+  (delete-selection-mode 1)  ;; You can select text and delete it by typing.
+
+  (electric-indent-mode -1)  ;; Turn off the weird indenting that Emacs does by default.
+  (electric-pair-mode 1)     ;; Turns on automatic parens pairing
+
+  ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+  ;; Otherwise, org-tempo is broken when you try to <s TAB...
+  (add-hook 'org-mode-hook (lambda ()
+                             (setq-local electric-pair-inhibit-predicate
+                                         `(lambda (c)
+                                            (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+  (setq intent-tabs-mode nil)  ;; Spaces for indentation
+
+  (global-auto-revert-mode t)  ;; Automatically show changes if the file has changed
+
+  (global-display-line-numbers-mode 1)  ;; Display line numbers
+  (setq display-line-numbers-type 't)
+
+  (global-visual-line-mode t)  ;; Enable truncated lines
+
+  (menu-bar-mode -1)   ;; Disable the menu bar
+  (scroll-bar-mode -1) ;; Disable the scroll bar
+  (tool-bar-mode -1)   ;; Disable the tool bar
+#+end_src
+
+* SHELLS AND TERMINALS
+** Eshell
+Eshell is an Emacs 'shell' that is written in Elisp.
+
+#+begin_src emacs-lisp
+  (use-package eshell-syntax-highlighting
+    :after esh-mode
+    :config
+    (eshell-syntax-highlighting-global-mode +1))
+
+  ;; eshell-syntax-highlighting -- adds fish/zsh-like syntax highlighting.
+  ;; eshell-rc-script -- your profile for eshell; like a bashrc for eshell.
+  ;; eshell-aliases-file -- sets an aliases file for the eshell.
+
+  (setq eshell-rc-script (concat user-emacs-directory "eshell/profile")
+        eshell-aliases-file (concat user-emacs-directory "eshell/aliases")
+        eshell-history-size 5000
+        eshell-buffer-maximum-lines 5000
+        eshell-hist-ignoredups t
+        eshell-scroll-to-bottom-on-input t
+        eshell-destroy-buffer-when-process-dies t
+        eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+#+end_src
+
+** Vterm
+Vterm is a terminal emulator within Emacs. The 'shell-file-name' setting sets the shell to be used in M-x shell, M-x term, M-x ansi-term and M-x vterm.
+
+#+begin_src emacs-lisp
+  (use-package vterm
+    :config
+    (setq shell-file-name "/bin/zsh"
+          vterm-max-scrollback 5000))
+#+end_src
+
+** Vterm-Toggle
+[[https://github.com/jixiuf/vterm-toggle][vterm-toggle]] toggles between the vterm buffer and whatever buffer you are editing.
+
+#+begin_src emacs-lisp
+  (use-package vterm-toggle
+    :after vterm
+    :config
+    (setq vterm-toggle-fullscreen-p nil)
+    (setq vterm-toggle-scope 'project)
+    (add-to-list 'display-buffer-alist
+                 '((lambda (buffer-or-name _)
+                     (let ((buffer (get-buffer buffer-or-name)))
+                       (with-current-buffer buffer
+                         (or (equal major-mode 'vterm-mode)
+                             (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+                   (display-buffer-reuse-window display-buffer-at-bottom)
+                   ;;(display-buffer-reuse-window display-buffer-in-direction)
+                   ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                   ;;(direction . bottom)
+                   ;;(dedicated . t) ;dedicated is supported in emacs27
+                   (reusable-frames . visible)
+                   (window-height . 0.3))))
+#+end_src
+
+* SPELLING
+Configure spelling, [[https://www.emacswiki.org/emacs/synonyms.el][synonyms]] and define-word.
+
+#+begin_src emacs-lisp
+  (require 'ispell)
+
+  (setq ispell-silently-savep t)
+  (setq ispell-dictionary "german")
+
+  (let ((langs '("german" "american")))
+    (setq lang-ring (make-ring (length langs)))
+    (dolist (elem langs) (ring-insert lang-ring elem)))
+
+  (if (file-exists-p (concat "~/.config/emacs/thesaurus/mthesaur.txt"))
+      (use-package synonyms
+        :elpaca nil
+        :load-path  (lambda () (expand-file-name "~/.config/emacs/contrib/synonyms/"))
+        :defer 120
+        :init
+        (setq synonyms-file        (concat "~/.config/emacs/thesaurus/mthesaur.txt"))
+        (setq synonyms-cache-file  (concat "~/.config/emacs/thesaurus/vkcachefile"))
+        :config
+        (defun sfieger-synonym-current-word ()
+          "Lookup synonyms for current word."
+          (interactive)
+          (synonyms-lookup (thing-at-point 'word) nil nil))
+        (sfieger/leader-keys
+          "S s" '(sfieger-synonym-current-word :wk "Synonyms for current word")))
+    (message (concat "»»» I could not locate \"" my-user-emacs-directory "~/.config/emacs/thesaurus/mthesaur.txt\"")))
+
+  (use-package define-word
+    :ensure t)
+#+end_src
+
+* SUDO EDIT
+[[https://github.com/nflath/sudo-edit][sudo-edit]] gives us the ability to open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
+
+#+begin_src emacs-lisp
+  (use-package sudo-edit)
+#+end_src
+
+* THEME
+#+begin_src emacs-lisp
+  (require 'modus-themes)
+  (require 'sfieger-solarized-modus-themes)
+
+  ;; Load theme by default
+  (load-theme 'modus-operandi t)
+  (add-hook 'modus-themes-after-load-theme-hook #'sfieger-setup-faces)
+
+  ;; Set faces on initial load
+  (sfieger-setup-faces)
+#+end_src
+
+* TLDR
+#+begin_src emacs-lisp
+  (use-package tldr)
+#+end_src
+
+* WHICH-KEY
+#+begin_src emacs-lisp
+  (use-package which-key
+    :init
+    (which-key-mode 1)
+    :diminish
+    :config
+    (setq which-key-side-window-location 'bottom
+          which-key-sort-order #'which-key-key-order-alpha
+          which-key-sort-uppercase-first nil
+          which-key-add-column-padding 1
+          which-key-max-display-columns nil
+          which-key-min-display-lines 6
+          which-key-side-window-slot -10
+          which-key-side-window-max-height 0.25
+          which-key-idle-delay 0.8
+          which-key-max-description-length 50
+          which-key-allow-imprecise-window-fit nil
+          which-key-seperator " → "))
+#+end_src
+
+* HELPER FUNCTIONS
+** Cycle ispell Language
+#+begin_src emacs-lisp
+  (defun sfieger-cycle-ispell-language ()
+    (interactive)
+    (let ((lang (ring-ref lang-ring -1)))
+      (ring-insert lang-ring lang)
+      (ispell-change-dictionary lang)))
+#+end_src
+
+** Cycle Line Numbers
+Function to cycle the line numbering: 'absolut' -> 'relative' -> 'off'
+
+#+begin_src emacs-lisp
+  (defun sfieger-cycle-line-numbers ()
+    (interactive)
+    (if (and (bound-and-true-p display-line-numbers-mode) (eq display-line-numbers-type 'relative))
+        (display-line-numbers-mode 0)
+      (if (and (bound-and-true-p display-line-numbers-mode) (eq display-line-numbers-type 't)) 
+          (progn
+            (setq display-line-numbers-type 'relative)
+            (display-line-numbers-mode 1))
+        (when (not (bound-and-true-p display-line-numbers-mode))
+          (setq display-line-numbers-type 't)
+          (display-line-numbers-mode 1)))))
+#+end_src
+
+** Dired Helper
+Functions to use enhance dired
+
+#+begin_src emacs-lisp
+      (defun sfieger-dired-tagtrees ()
+        "Run \"filetags --tagtrees\" on marked or current files"
+        (interactive)
+        (let (files (if (dired-get-marked-files)
+                        (dired-get-marked-files)
+                      '((dired-get-filename)))))
+        (dired-do-shell-command "filetags --tagtrees --tagtrees-handle-no-tag no-tags *" nil files))
+
+      (defun sfieger-dired-tagtrees-recursive ()
+        "Run \"filetags --tagtrees --recursive\" on marked or current files"
+        (interactive)
+        (let (files (if (dired-get-marked-files)
+                        (dired-get-marked-files)
+                      '((dired-get-filename)))))
+        (dired-do-shell-command "filetags --tagtrees --recursive --tagtrees-handle-no-tag no-tags *" nil files))
+
+      (defun sfieger-dired-filetags-filter ()
+        "Run \"filtags --filter\" on marked or current files"
+        (interactive)
+        (let (files (if (dired-get-marked-files)
+                        (dired-get-marked-files)
+                      '((dired-get-filename)))))
+        (dired-do-shell-command "filetags --filter *" nil files))
+
+      (defun sfieger-dired-filetags-filter-recursive ()
+        "Run \"filetags --filter --recursive\" on marked or current files"
+        (interactive)
+        (let (files (if (dired-get-marked-files)
+                        (dired-get-marked-files)
+                      '((dired-get-filename)))))
+        (dired-do-shell-command "filetags --filter --recursive *" nil files))
+
+      (defun sfieger-dired-copy-filename-as-absolute-link (&optional arg)
+        "Copy current file name with absolute path as [[file:<absolute path>]] link.
+                 If the universal argument is given, the path is omitted in the link description."
+        (interactive "P")
+        (dired-copy-filename-as-kill 0)
+        (let* ((path (current-kill 0)))
+          (kill-new (concat "[[file:" path "]]"))))
+#+end_src
