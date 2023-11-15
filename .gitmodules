@@ -4,3 +4,6 @@
 [submodule ".config/emacs/contrib/modus-themes"]
 	path = .config/emacs/contrib/modus-themes
 	url = https://github.com/protesilaos/modus-themes.git
+[submodule ".config/emacs/contrib/buffer-move"]
+	path = .config/emacs/contrib/buffer-move
+	url = https://github.com/lukhas/buffer-move.git
