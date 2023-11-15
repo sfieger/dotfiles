@@ -1,3 +1,6 @@
 [submodule ".vim/themes/vim-colors-solarized"]
 	path = .vim/themes/vim-colors-solarized
 	url = https://github.com/altercation/vim-colors-solarized.git
+[submodule ".config/emacs/contrib/modus-themes"]
+	path = .config/emacs/contrib/modus-themes
+	url = https://github.com/protesilaos/modus-themes.git
