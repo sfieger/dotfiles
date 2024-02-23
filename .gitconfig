@@ -1,85 +1,131 @@
 [user]
-	email = steffen@fieger-schortens.de
-	name = "Steffen Fieger"
-	signingkey = 722F7C6F96DC1549
-[core]
-	# Windows
-#	autocrlf = true
-#	whitespace = trailing-space,space-before-tab,indent-with-non-tab,cr-at-eol
-	# Linux
-	autocrlf = input
-	whitespace = trailing-space,space-before-tab,indent-whith-non-tab,cr-at-eol
-	longpaths = true
-	editor = vim
-	quotepath = off
-[color "decorate"]
-	head = cyan
-	tag = yellow
-	branch = green
-	remotebranch = red
-[branch]
-	autosetuprebase = always
-[checkout]
-        defaultRemote = origin
-[pull]
-	rebase = true
-[push]
-	default = current
-[commit]
-        gpgsign = true
-[diff]
-	renameLimit = 1000
-	external = difft
-[merge]
-	tool = vimdiff2
-	conflictstyle = diff3
-[mergetool]
-	prompt = false
-[alias]
-        # basics
-        br = branch
-        ca = commit --amend
-        ci = commit
-        cl = clone
-        co = checkout
-        col = checkout @{-1}
-        cp = cherry-pick
-        st = status -s
-        stv = status
+    email = steffen@fieger-schortens.de
+    name = "Steffen Fieger"
+    signingkey = ~/.ssh/todo.pub
 
-        # reset
-        r = reset
-        rh = reset --hard
-        rhu = reset --hard @{u}
+[gpg]
+    format = ssh
 
-        # logs
-        fl = log -u
-        l = log -1 HEAD
-        ll = log --pretty=format:'%C(auto)%h %C(magenta)%ad %C(blue)[%an] %C(auto)%d %C(reset)%s' --all --graph --date=format:'%Y-%m-%d %H:%M'
-
-        # diffs
-        dc = diff --cached
-        dlc = diff --cached HEAD^
-
-        # fancy stuff
-        all = "!f() { ls | xargs -I{} git -C {} $1; }; f"
-        dependency-check = !~/dependency-check/bin/dependency-check.sh -s ./
-        develop = checkout develop
-        dummy = commit -m 'This is a blank commit' --allow-empty
-        fetchall = fetch --all
-        ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
-        lasttag = describe --tags --abbrev=0
-        listalias = "!git config -l | grep alias | cut -c 7-"
-        main = checkout main
-        new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
-        outahere = "!echo 'exit does not work :('"
-        revd = review -d
-        rmbs = "!git branch | grep -v "main" | grep -v "master" | xargs git branch -D"
 [credential]
-	helper = store
+    helper = store
+
+[core]
+    # Windows
+    # autocrlf = true
+    # whitespace = trailing-space,space-before-tab,indent-with-non-tab,cr-at-eol
+    # Linux
+    autocrlf = input
+    whitespace = trailing-space,space-before-tab,indent-whith-non-tab,cr-at-eol
+    longpaths = true
+    editor = vim
+    quotepath = off
+
+[color]
+    ui = auto
+
+[color "decorate"]
+    head = cyan
+    tag = yellow
+    branch = green
+    remotebranch = red
+
+[column]
+    ui = auto
+
+[branch]
+    autosetuprebase = always
+    sort = -committerdate
+
+[checkout]
+    defaultRemote = origin
+
+[commit]
+    gpgsign = true
+
+[diff]
+    renameLimit = 1000
+    tool = difftastic
+
+[difftool]
+    prompt = false
+
+[difftool "difftastic"]
+    cmd = difft "$LOCAL" "$REMOTE"
+
+[merge]
+    tool = vimdiff
+
+[mergetool]
+    prompt = false
+
+[pager]
+    difftool = true
+
+[pull]
+    rebase = true
+
+[push]
+    default = current
+
+[rerere]
+    enabled = false
+
+
 [gitflow "prefix"]
-	hotfix = hotfix/
-	feature = feature/
-	bugfix = bugfix/
-	release = release/
-	support = support/
+    hotfix = hotfix/
+    feature = feature/
+    bugfix = bugfix/
+    release = release/
+    support = support/
+
+[maintenance]
+
+
+[alias]
+    # basics
+    br = branch
+    ca = commit --amend
+    cane = commit --amend --no-edit
+    ci = commit
+    cl = clone
+    co = checkout
+    col = checkout @{-1}
+    cp = cherry-pick
+    st = status -s
+    stv = status
+
+    # blame
+    blame = blame -w
+    bc = blame -C
+    bcc = blame -C -C
+    bccc = blame -C -C -C
+
+    # diffs
+    dc = diff --cached
+    dlc = diff --cached HEAD^
+    dft = difftool
+    dftc = difftool --cached
+    dftlc = difftool --cached HEAD^
+
+    # logs
+    l = log -1 HEAD
+    ll = log --pretty=format:'%C(auto)%h %C(magenta)%ad %C(auto)%d %C(reset)%s %C(blue)[%an]' --all --graph --date=format:'%Y-%m-%d %H:%M'
+    dl = "!f() { GIT_EXTERNAL_DIFF=difft git log -p --ext-diff $@; }; f"
+    pl = log -u
+
+    # reset
+    r = reset
+    rh = reset --hard
+    rhu = reset --hard @{u}
+
+    # fancy stuff
+    all = "!f() { ls | xargs -I{} git -C {} $1; }; f"
+    dependency-check = !~/dependency-check/bin/dependency-check.sh -s ./
+    dummy = commit -m 'This is a blank commit' --allow-empty
+    fetchall = fetch --all
+    ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
+    lasttag = describe --tags --abbrev=0
+    listalias = "!git config -l | grep alias | cut -c 7-"
+    main = checkout main
+    new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+    rmbs = "!git branch | grep -v "main" | grep -v "master" | grep -v "hotfix" | xargs git branch -D"
