@@ -3,8 +3,8 @@
 :set shell=/usr/bin/zsh
 
 " minimal settings
-filetype plugin indent on
 syntax enable
+filetype plugin indent on
 set backspace=indent,eol,start
 set hidden
 set noswapfile
@@ -41,6 +41,19 @@ MapToggle <F8> incsearch
 
 set number
 MapToggle <F9> relativenumber
+
+" Omnicompletion
+set omnifunc=syntaxcomplete#Complete
+:set completeopt=longest,menuone
+
+:inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
+  \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+
+" open omni completion menu closing previous if open and opening new menu without changing the text
+inoremap <expr> <C-@> (pumvisible() ? (col('.') > 1 ? '<Esc>i<Right>' : '<Esc>i') : '') .
+            \ '<C-x><C-o><C-r>=pumvisible() ? "\<lt>C-n>\<lt>C-p>\<lt>Down>" : ""<CR>'
 
 
 " UI
