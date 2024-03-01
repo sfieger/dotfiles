@@ -3,8 +3,7 @@
 :set shell=/usr/bin/zsh
 
 " minimal settings
-syntax enable
-filetype plugin indent on
+set nocompatible
 set backspace=indent,eol,start
 set hidden
 set noswapfile
@@ -12,7 +11,9 @@ set noswapfile
 let $RTP=split(&runtimepath, ',')[0]
 let $RC="$HOME/.vim/vimrc"
 
-set path=.,**
+" Search down into subfolders
+" Provides tab-completion for all file-related tasks
+set path+=**
 
 " default indentation
 set shiftwidth=4
@@ -20,6 +21,34 @@ set softtabstop=4
 set expandtab
 set autoindent
 
+
+" UI
+" colortheme
+set background=dark
+colorscheme solarized
+call togglebg#map("<F5>")
+highlight SpecialKey ctermfg=darkred
+
+set showmode
+set showcmd
+
+set laststatus=2
+set cmdheight=2
+
+set wildmenu
+set ruler
+
+
+" FILE BROWSING
+let g:netrw_banner=0        " disable annoying banner
+let g:netrw_browse_split=4  " open in prior window
+let g:netrw_altv=1          " open splits to the right
+let g:netrw_liststyle=3     " tree view
+let g:netrw_list_hide=netrw_gitignore#Hide()
+let g:netrw_list_hide.=',\(^\|\s\s\)\zs\.\S\b'
+
+
+" editing goodies
 " Map key to toggle opt
 function MapToggle(key, opt)
     let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
@@ -28,7 +57,6 @@ function MapToggle(key, opt)
 endfunction
 command -nargs=+ MapToggle call MapToggle(<f-args>)
 
-" editing goodies
 set cursorline
 set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
 set showbreak=\\
@@ -36,21 +64,32 @@ MapToggle <F6> list
 
 set ignorecase
 set smartcase
+
+set hlsearch
+set incsearch
+set number relativenumber
 MapToggle <F7> hlsearch
 MapToggle <F8> incsearch
-
-set number
 MapToggle <F9> relativenumber
 
+
+" TAG JUMPING
+" Create the `tags` file
+command! MakeTags !ctags -R .
+
+
+" Syntax Highlighting
 " Codecompletion
-:set completeopt=longest,menuone
-    
+syntax enable
+:filetype plugin indent on
     if has("autocmd") && exists("+omnifunc")
-autocmd Filetype *
-    \ if &omnifunc == "" |
-    \ setlocal omnifunc=syntaxcomplete#Complete |
-    \ endif
-    endif 
+        autocmd Filetype *
+            \   if &omnifunc == "" |
+            \       setlocal omnifunc=syntaxcomplete#Complete |
+            \   endif
+    endif
+
+:set completeopt=longest,menuone
 
 :inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
@@ -67,25 +106,5 @@ inoremap <expr> <S-@> (pumvisible() ? (col('.') > 1 ? '<Esc>i<Right>' : '<Esc>i'
             \ '<C-x><C-u><C-r>=pumvisible() ? "\<lt>C-n>\<lt>C-p>\<lt>Down>" : ""<CR>'
 
 
-" UI
-" colortheme
-if has('gui_running')
-    set background=light
-else
-    set background=dark
-endif
-colorscheme solarized
-call togglebg#map("<F5>")
-highlight SpecialKey ctermfg=darkred
-
-set showmode
-set showcmd
-
-set laststatus=2
-set cmdheight=2
-
-set wildmenu
-set ruler
-
-let g:netrw_banner=0
-let g:netrw_liststyle=3
+" SNIPPETS
+nnoremap \html :-1read $HOME/.vim/templates/skeleton.html<CR>3jwf>a
