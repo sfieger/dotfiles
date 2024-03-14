@@ -115,13 +115,13 @@ endfunction
 
 autocmd BufWinEnter * let b:git_branch = GitBranch()
 
-highlight GitBranch ctermfg=12 ctermbg=8
+highlight StatusHighlight ctermfg=12 ctermbg=8
 
 set statusline=
-set statusline+=%#GitBranch#%{b:git_branch}%*
-set statusline+=\ %F\ %M\ %Y\ %{&fileencoding?&fileencoding:&encoding}\[%{&fileformat}\]%r
-set statusline+=%=%l\:%c\ %p%%
+set statusline+=%#StatusHighlight#%{b:git_branch}%*
+set statusline+=\ %f\ %M\ \ \ \ %Y\ %{&fileencoding?&fileencoding:&encoding}\[%{&fileformat}\]%r
 set statusline+=%=ascii:\ %b\ hex:\ 0x%B
+set statusline+=\ \ \ \ %#StatusHighlight#%l\:%c\ %p%%
 
 
 " Map key to toggle opt
