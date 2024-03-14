@@ -8,8 +8,11 @@ set backspace=indent,eol,start
 set hidden
 set noswapfile
 
+
 let $RTP=split(&runtimepath, ',')[0]
 let $RC="$HOME/.vim/vimrc"
+
+command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
 " Search down into subfolders
 " Provides tab-completion for all file-related tasks
@@ -23,20 +26,17 @@ set autoindent
 
 
 " UI
-" colortheme
-set background=dark
-colorscheme solarized
-call togglebg#map("<F5>")
-highlight SpecialKey ctermfg=darkred
-
 set showmode
+
 set showcmd
+set cmdheight=1
 
 set laststatus=2
-set cmdheight=2
 
 set wildmenu
 set ruler
+
+set showmatch
 
 
 " FILE BROWSING
@@ -49,18 +49,9 @@ let g:netrw_list_hide.=',\(^\|\s\s\)\zs\.\S\b'
 
 
 " editing goodies
-" Map key to toggle opt
-function MapToggle(key, opt)
-    let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
-    exec 'nnoremap '.a:key.' '.cmd
-    exec 'inoremap '.a:key." \<C-O>".cmd
-endfunction
-command -nargs=+ MapToggle call MapToggle(<f-args>)
-
 set cursorline
 set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
 set showbreak=\\
-MapToggle <F6> list
 
 set ignorecase
 set smartcase
@@ -68,9 +59,8 @@ set smartcase
 set hlsearch
 set incsearch
 set number relativenumber
-MapToggle <F7> hlsearch
-MapToggle <F8> incsearch
-MapToggle <F9> relativenumber
+
+set colorcolumn=80,120
 
 
 " TAG JUMPING
@@ -108,3 +98,39 @@ inoremap <expr> <S-@> (pumvisible() ? (col('.') > 1 ? '<Esc>i<Right>' : '<Esc>i'
 
 " SNIPPETS
 nnoremap \html :-1read $HOME/.vim/templates/skeleton.html<CR>3jwf>a
+
+
+" colortheme
+set background=dark
+colorscheme solarized
+call togglebg#map("<F5>")
+
+highlight SpecialKey ctermfg=1
+
+
+" Statusline
+function! GitBranch()
+  return trim(system("git -C " . expand("%:h") . " branch --show-current 2>/dev/null"))
+endfunction
+
+autocmd BufWinEnter * let b:git_branch = GitBranch()
+
+set statusline=
+set statusline+=%{b:git_branch}
+set statusline+=\ %F\ %M\ %Y\ %{&fileencoding?&fileencoding:&encoding}\[%{&fileformat}\]%r
+set statusline+=%=%l\:%c\ %p%%
+set statusline+=%=ascii:\ %b\ hex:\ 0x%B
+
+
+" Map key to toggle opt
+function! MapToggle(key, opt)
+  let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
+  exec 'nnoremap '.a:key.' '.cmd
+  exec 'inoremap '.a:key." \<C-O>".cmd
+endfunction
+command -nargs=+ MapToggle call MapToggle(<f-args>)
+
+MapToggle <F6> list
+MapToggle <F7> hlsearch
+MapToggle <F8> incsearch
+MapToggle <F9> relativenumber
