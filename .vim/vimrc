@@ -102,15 +102,20 @@ nnoremap \html :-1read $HOME/.vim/templates/skeleton.html<CR>3jwf>a
 
 " colortheme
 set background=dark
+let g:solarized_visibility="high"
 colorscheme solarized
-call togglebg#map("<F5>")
 
-highlight SpecialKey ctermfg=1
+call togglebg#map("<F5>")
 
 
 " Statusline
 function! GitBranch()
-  return trim(system("git -C " . expand("%:h") . " branch --show-current 2>/dev/null"))
+  let branch = trim(system("git -C " . expand("%:h") . " branch --show-current 2>/dev/null"))
+  if empty(branch)
+      return ''
+  else
+      return branch . ' '
+  endif
 endfunction
 
 autocmd BufWinEnter * let b:git_branch = GitBranch()
@@ -118,10 +123,16 @@ autocmd BufWinEnter * let b:git_branch = GitBranch()
 highlight StatusHighlight ctermfg=12 ctermbg=8
 
 set statusline=
-set statusline+=%#StatusHighlight#%{b:git_branch}%*
-set statusline+=\ %f\ %M\ \ \ \ %Y\ %{&fileencoding?&fileencoding:&encoding}\[%{&fileformat}\]%r
-set statusline+=%=ascii:\ %b\ hex:\ 0x%B
-set statusline+=\ \ \ \ %#StatusHighlight#%l\:%c\ %p%%
+set statusline+=%#StatusHighlight#                                              " other background
+set statusline+=%{b:git_branch}                                                 " git branch
+set statusline+=%*\                                                             " default background
+set statusline+=%f\ %r%m                                                        " path, read only  and editing marker
+set statusline+=%r\ %y\                                                         " read only marker and filetype
+set statusline+=%{&fileencoding?&fileencoding:&encoding}\ \[%{&fileformat}\]    " encoding and format
+set statusline+=%=                                                              " seperator
+set statusline+=ascii:\ %04b\ hex:\ 0x%04B\                                     " ascii and hex under cursor
+set statusline+=%#StatusHighlight#                                              " other background
+set statusline+=\ %5l\:%-3c\ %3p%%                                              " position
 
 
 " Map key to toggle opt
