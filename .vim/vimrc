@@ -120,6 +120,22 @@ endfunction
 
 autocmd BufWinEnter * let b:git_branch = GitBranch()
 
+function! HighlightSearch()
+  if &hlsearch
+    return 'Hl' . ' '
+  else
+    return ''
+  endif
+endfunction
+
+function! IncSearch()
+  if &incsearch
+    return 'Inc' . ' '
+  else
+    return ''
+  endif
+endfunction
+
 highlight StatusHighlight ctermfg=12 ctermbg=8
 
 set statusline=
@@ -131,7 +147,9 @@ set statusline+=%r\ %y\                                                         
 set statusline+=%{&fileencoding?&fileencoding:&encoding}\ \[%{&fileformat}\]    " encoding and format
 set statusline+=%=                                                              " seperator
 set statusline+=ascii:\ %04b\ hex:\ 0x%04B\                                     " ascii and hex under cursor
-set statusline+=%#StatusHighlight#                                              " other background
+set statusline+=%#StatusHighlight#                                              " alternative other background
+set statusline+=\ %{HighlightSearch()}%{IncSearch()}                            " HlSearch, IncSearch marker
+set statusline+=%#StatusLineNC#                                                 " other background
 set statusline+=\ %5l\:%-3c\ %3p%%                                              " position
 
 
