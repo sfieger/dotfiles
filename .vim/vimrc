@@ -8,7 +8,6 @@ set backspace=indent,eol,start
 set hidden
 set noswapfile
 
-
 let $RTP=split(&runtimepath, ',')[0]
 let $RC="$HOME/.vim/vimrc"
 
@@ -25,7 +24,7 @@ set expandtab
 set autoindent
 
 
-" UI
+" UI "{{{
 set showmode
 
 set showcmd
@@ -38,17 +37,19 @@ set ruler
 
 set showmatch
 
+syntax enable
+"}}}
 
-" FILE BROWSING
+" FILE BROWSING "{{{
 let g:netrw_banner=0        " disable annoying banner
 let g:netrw_browse_split=4  " open in prior window
 let g:netrw_altv=1          " open splits to the right
 let g:netrw_liststyle=3     " tree view
 let g:netrw_list_hide=netrw_gitignore#Hide()
 let g:netrw_list_hide.=',\(^\|\s\s\)\zs\.\S\b'
-
-
-" editing goodies
+"}}}
+    
+" EDITING GOODIES "{{{
 set cursorline
 set listchars=tab:>-,nbsp:_,trail:_,eol:§,extends:>,precedes:<
 set showbreak=\\
@@ -61,16 +62,14 @@ set incsearch
 set number relativenumber
 
 set colorcolumn=80,120
+"}}}
 
-
-" TAG JUMPING
+" TAG JUMPING "{{{
 " Create the `tags` file
 command! MakeTags !ctags -R .
+"}}}
 
-
-" Syntax Highlighting
-" Codecompletion
-syntax enable
+" CODECOMPLETION "{{{
 :filetype plugin indent on
     if has("autocmd") && exists("+omnifunc")
         autocmd Filetype *
@@ -94,21 +93,28 @@ inoremap <expr> <C-@> (pumvisible() ? (col('.') > 1 ? '<Esc>i<Right>' : '<Esc>i'
 " open user completion menu closing previous if open and opening new menu without changing the text
 inoremap <expr> <S-@> (pumvisible() ? (col('.') > 1 ? '<Esc>i<Right>' : '<Esc>i') : '') .
             \ '<C-x><C-u><C-r>=pumvisible() ? "\<lt>C-n>\<lt>C-p>\<lt>Down>" : ""<CR>'
+"}}}
 
-
-" SNIPPETS
+" SNIPPETS "{{{
 nnoremap \html :-1read $HOME/.vim/templates/skeleton.html<CR>3jwf>a
+"}}}
 
+" FOLDING "{{{
+set foldmethod=marker
 
-" colortheme
+nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
+vnoremap <Space> zf
+"}}}
+
+" COLORTHEME "{{{
 set background=dark
 let g:solarized_visibility="high"
 colorscheme solarized
 
 call togglebg#map("<F5>")
+"}}}
 
-
-" Statusline
+" STATUSLINE "{{{
 function! GitBranch()
   let branch = trim(system("git -C " . expand("%:h") . " branch --show-current 2>/dev/null"))
   if empty(branch)
@@ -151,9 +157,9 @@ set statusline+=%#StatusHighlight#                                              
 set statusline+=\ %{HighlightSearch()}%{IncSearch()}                            " HlSearch, IncSearch marker
 set statusline+=%#StatusLineNC#                                                 " other background
 set statusline+=\ %5l\:%-3c\ %3p%%                                              " position
+"}}}
 
-
-" Map key to toggle opt
+" MAP KEY TO TOGGLE OPTION "{{{
 function! MapToggle(key, opt)
   let cmd = ':set '.a:opt.'! \| set '.a:opt."?\<CR>"
   exec 'nnoremap '.a:key.' '.cmd
@@ -165,3 +171,4 @@ MapToggle <F6> list
 MapToggle <F7> hlsearch
 MapToggle <F8> incsearch
 MapToggle <F9> relativenumber
+"}}}
